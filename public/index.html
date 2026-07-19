@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Screening Assistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside id="sidebar">
+    <h2>Lịch sử</h2>
+    <ul id="history"></ul>
+  </aside>
+  <main>
+    <h1>Screening Assistant</h1>
+    <p class="tagline">Quyết định "có đáng xem 2 tiếng không" trong 2 phút.</p>
+    <form id="screen-form">
+      <input id="url" type="text" placeholder="Dán link YouTube..." required>
+      <button type="submit" id="go">Screen</button>
+    </form>
+    <div id="transcript-box" hidden>
+      <p>Video này không có captions. Dán transcript vào đây rồi bấm Screen lại:</p>
+      <textarea id="transcript" rows="6"></textarea>
+    </div>
+    <ol id="progress" hidden>
+      <li data-stage="ingest">Lấy dữ liệu video</li>
+      <li data-stage="content">Tóm tắt + facts/stance</li>
+      <li data-stage="factcheck">Fact-check</li>
+      <li data-stage="social">Social signals</li>
+      <li data-stage="compose">Verdict</li>
+    </ol>
+    <div id="error" class="error" hidden></div>
+    <section id="report" hidden>
+      <div id="verdict-card"></div>
+      <details open><summary>Tóm tắt nội dung</summary><div id="sec-content"></div></details>
+      <details open><summary>Facts vs. Stance</summary><div id="sec-facts"></div></details>
+      <details open><summary>Fact-check</summary><div id="sec-factcheck"></div></details>
+      <details open><summary>Social signals</summary><div id="sec-social"></div></details>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

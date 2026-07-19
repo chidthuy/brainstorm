@@ -1,0 +1,19 @@
+{
+  "name": "screening-assistant",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0",
+    "youtubei.js": "^10.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
+}

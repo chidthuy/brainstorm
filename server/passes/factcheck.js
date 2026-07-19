@@ -14,7 +14,7 @@ export function buildFactcheck({ content }) {
       content: `Tóm tắt video: ${content.summary}\n\nFacts cần kiểm chứng:\n` +
         content.facts.map((f, i) => `${i + 1}. ${f}`).join('\n')
     }],
-    tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }]
+    tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }]
   };
 }
 

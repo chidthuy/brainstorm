@@ -1,4 +1,5 @@
 const $ = (sel) => document.querySelector(sel);
+const HISTORY_KEY = 'screening:index';
 
 function el(tag, text, cls) {
   const n = document.createElement(tag);
@@ -12,6 +13,53 @@ function list(items) {
   for (const it of items) ul.append(el('li', it));
   return ul;
 }
+
+// ---------- lịch sử lưu trong trình duyệt (localStorage) ----------
+
+function saveToHistory(report) {
+  try {
+    localStorage.setItem('screening:report:' + report.id, JSON.stringify(report));
+    const index = loadIndex().filter((e) => e.id !== report.id);
+    index.unshift({
+      id: report.id,
+      title: report.video.title,
+      verdict: report.verdict?.verdict ?? null
+    });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(index.slice(0, 100)));
+  } catch { /* localStorage đầy hoặc bị chặn — bỏ qua */ }
+}
+
+function loadIndex() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function loadReport(id) {
+  try {
+    return JSON.parse(localStorage.getItem('screening:report:' + id) || 'null');
+  } catch {
+    return null;
+  }
+}
+
+function renderHistory() {
+  const ul = $('#history');
+  ul.replaceChildren();
+  for (const it of loadIndex()) {
+    const li = el('li');
+    li.append(el('span', it.verdict ?? '·', 'v'), el('span', it.title));
+    li.onclick = () => {
+      const r = loadReport(it.id);
+      if (r) { setProgressDone(); renderReport(r); }
+    };
+    ul.append(li);
+  }
+}
+
+// ---------- render báo cáo ----------
 
 function renderReport(r) {
   $('#report').hidden = false;
@@ -68,21 +116,7 @@ function renderReport(r) {
   } else ss.append(el('p', r.errors.social ?? 'Không có dữ liệu', 'pass-error'));
 }
 
-async function loadHistory() {
-  const items = await (await fetch('/api/reports')).json();
-  const ul = $('#history');
-  ul.replaceChildren();
-  for (const it of items) {
-    const li = el('li');
-    li.append(el('span', it.verdict ?? '·', 'v'), el('span', it.title));
-    li.onclick = async () => {
-      const r = await (await fetch('/api/reports/' + it.id)).json();
-      setProgressDone();
-      renderReport(r);
-    };
-    ul.append(li);
-  }
-}
+// ---------- tiến độ ----------
 
 function setStage(stage, cls) {
   const li = document.querySelector(`#progress li[data-stage="${stage}"]`);
@@ -93,6 +127,46 @@ function setProgressDone() {
   for (const li of document.querySelectorAll('#progress li')) li.className = 'ok';
 }
 
+function handleEvent(event, data) {
+  if (event === 'meta') {
+    setStage('ingest', 'ok');
+    if (!data.hasTranscript && !$('#transcript').value.trim()) $('#transcript-box').hidden = false;
+  } else if (event === 'stage') {
+    setStage(data.stage, 'active');
+  } else if (event === 'pass') {
+    const stage = data.pass === 'verdict' ? 'compose' : data.pass;
+    setStage(stage, data.ok ? 'ok' : 'fail');
+  } else if (event === 'done') {
+    renderReport(data.report);
+    saveToHistory(data.report);
+    renderHistory();
+  } else if (event === 'fatal') {
+    showError(data.error);
+  }
+}
+
+// Đọc luồng SSE từ fetch response (thay cho EventSource để gửi được mật khẩu + POST body).
+async function readStream(res) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split('\n\n');
+    buffer = blocks.pop();
+    for (const block of blocks) {
+      const evLine = block.split('\n').find((l) => l.startsWith('event:'));
+      const dataLine = block.split('\n').find((l) => l.startsWith('data:'));
+      if (!evLine || !dataLine) continue;
+      handleEvent(evLine.slice(6).trim(), JSON.parse(dataLine.slice(5).trim()));
+    }
+  }
+}
+
+// ---------- submit ----------
+
 $('#screen-form').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   $('#go').disabled = true;
@@ -102,45 +176,35 @@ $('#screen-form').addEventListener('submit', async (ev) => {
   for (const li of document.querySelectorAll('#progress li')) li.className = '';
   setStage('ingest', 'active');
 
+  const password = $('#password').value;
+  if (password) sessionStorage.setItem('screening:password', password);
+
   const body = { url: $('#url').value };
   const pasted = $('#transcript').value.trim();
   if (pasted) body.transcriptOverride = pasted;
 
-  let resp;
+  let res;
   try {
-    resp = await fetch('/api/screen', {
+    res = await fetch('/api/screen', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-App-Password': password },
       body: JSON.stringify(body)
     });
   } catch (err) {
     return showError('Không gọi được server: ' + err.message);
   }
-  const data = await resp.json();
-  if (!resp.ok) return showError(data.error);
-  setStage('ingest', 'ok');
-  if (!data.hasTranscript && !pasted) $('#transcript-box').hidden = false;
 
-  const es = new EventSource(`/api/screen/${data.jobId}/events`);
-  es.addEventListener('stage', (e) => setStage(JSON.parse(e.data).stage, 'active'));
-  es.addEventListener('pass', (e) => {
-    const p = JSON.parse(e.data);
-    const stage = p.pass === 'verdict' ? 'compose' : p.pass;
-    setStage(stage, p.ok ? 'ok' : 'fail');
-  });
-  es.addEventListener('done', async (e) => {
-    es.close();
-    $('#go').disabled = false;
-    const { reportId } = JSON.parse(e.data);
-    const r = await (await fetch('/api/reports/' + reportId)).json();
-    renderReport(r);
-    loadHistory();
-  });
-  es.addEventListener('fatal', (e) => {
-    es.close();
-    showError(JSON.parse(e.data).error);
-  });
-  es.onerror = () => { es.close(); showError('Mất kết nối tới server.'); };
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({ error: 'Lỗi không rõ' }));
+    return showError(data.error);
+  }
+
+  try {
+    await readStream(res);
+  } catch (err) {
+    showError('Mất kết nối khi đang phân tích: ' + err.message);
+  }
+  $('#go').disabled = false;
 });
 
 function showError(msg) {
@@ -150,4 +214,18 @@ function showError(msg) {
   box.hidden = false;
 }
 
-loadHistory();
+// ---------- khởi động ----------
+
+async function init() {
+  renderHistory();
+  try {
+    const cfg = await (await fetch('/api/config')).json();
+    if (cfg.requiresPassword) {
+      const field = $('#password');
+      field.hidden = false;
+      field.value = sessionStorage.getItem('screening:password') || '';
+    }
+  } catch { /* để yên, coi như không cần mật khẩu */ }
+}
+
+init();

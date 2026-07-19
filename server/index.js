@@ -1,16 +1,32 @@
 import 'dotenv/config';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import express from 'express';
 import { fetchVideoData } from './ingest.js';
 import { runScreening } from './pipeline.js';
 import { callClaude } from './claude.js';
-import { saveReport, getReport, listReports } from './store.js';
-import { createJob, getJob } from './jobs.js';
+import { isAuthorized } from './auth.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PASSWORD = process.env.APP_PASSWORD || '';
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
-app.use(express.static('public'));
+app.use(express.static(join(__dirname, '..', 'public')));
 
+// Cho client biết có cần mật khẩu không (để hiện ô nhập).
+app.get('/api/config', (_req, res) => {
+  res.json({ requiresPassword: !!PASSWORD });
+});
+
+// Chạy toàn bộ screening trong MỘT request và stream tiến độ trực tiếp về client
+// (hợp với serverless: không có background job, không lưu file).
 app.post('/api/screen', async (req, res) => {
+  const provided = req.get('x-app-password') ?? req.body?.password;
+  if (!isAuthorized(PASSWORD, provided)) {
+    return res.status(401).json({ error: 'Sai mật khẩu' });
+  }
+
   const { url, transcriptOverride } = req.body ?? {};
   if (!url) return res.status(400).json({ error: 'Thiếu url' });
 
@@ -22,33 +38,31 @@ app.post('/api/screen', async (req, res) => {
   }
   if (transcriptOverride) videoData.transcriptOverride = transcriptOverride;
 
-  const job = createJob();
-  res.status(202).json({ jobId: job.id, video: videoData, hasTranscript: !!videoData.transcript });
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders?.();
 
-  (async () => {
-    try {
-      const report = await runScreening(videoData, { callClaude }, (e, p) => job.emit(e, p));
-      await saveReport(report);
-      job.finish('done', { reportId: report.id });
-    } catch (err) {
-      job.finish('fatal', { error: String(err.message ?? err) });
-    }
-  })();
+  const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+
+  send('meta', {
+    title: videoData.title,
+    hasTranscript: !!videoData.transcript
+  });
+
+  try {
+    const report = await runScreening(videoData, { callClaude }, send);
+    send('done', { report });
+  } catch (err) {
+    send('fatal', { error: String(err.message ?? err) });
+  }
+  res.end();
 });
 
-app.get('/api/screen/:jobId/events', (req, res) => {
-  const job = getJob(req.params.jobId);
-  if (!job) return res.status(404).json({ error: 'Job không tồn tại' });
-  job.subscribe(res);
-});
+// Chỉ nghe cổng khi chạy local. Trên Vercel, app được export làm handler.
+if (!process.env.VERCEL) {
+  const port = Number(process.env.PORT ?? 3000);
+  app.listen(port, () => console.log(`Screening Assistant: http://localhost:${port}`));
+}
 
-app.get('/api/reports', async (_req, res) => res.json(await listReports()));
-
-app.get('/api/reports/:id', async (req, res) => {
-  const report = await getReport(req.params.id);
-  if (!report) return res.status(404).json({ error: 'Không tìm thấy báo cáo' });
-  res.json(report);
-});
-
-const port = Number(process.env.PORT ?? 3000);
-app.listen(port, () => console.log(`Screening Assistant: http://localhost:${port}`));
+export default app;

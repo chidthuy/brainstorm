@@ -15,11 +15,14 @@
     <h1>Screening Assistant</h1>
     <p class="tagline">Quyết định "có đáng xem 2 tiếng không" trong 2 phút.</p>
     <form id="screen-form">
-      <input id="url" type="text" placeholder="Dán link YouTube..." required>
-      <button type="submit" id="go">Screen</button>
+      <input id="password" type="password" placeholder="Mật khẩu" autocomplete="current-password" hidden>
+      <div class="row">
+        <input id="url" type="text" placeholder="Dán link YouTube..." required>
+        <button type="submit" id="go">Screen</button>
+      </div>
     </form>
     <div id="transcript-box" hidden>
-      <p>Video này không có captions. Dán transcript vào đây rồi bấm Screen lại:</p>
+      <p>Video này không có phụ đề. Dán transcript vào đây rồi bấm Screen lại:</p>
       <textarea id="transcript" rows="6"></textarea>
     </div>
     <ol id="progress" hidden>

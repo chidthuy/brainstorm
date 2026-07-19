@@ -2,6 +2,13 @@
 
 *Trợ lý screening video dài. Nguồn: CVP brief (khung FWWBU), 2026-07-19.*
 
+> **Addendum (deploy Vercel):** Bản đầu thiết kế local-first (background job +
+> SSE endpoint riêng + lưu file JSON trong `data/`). Để deploy lên Vercel
+> (serverless), kiến trúc đổi sang: screening chạy trọn trong **một request**
+> và stream SSE trực tiếp; lịch sử chuyển sang **localStorage** của trình duyệt;
+> thêm lớp **mật khẩu** (`APP_PASSWORD`). Xem `DEPLOY.md`. Bốn pass phân tích
+> và pipeline giữ nguyên.
+
 ## Mục tiêu
 
 Biến quyết định "có nên xem video 2 tiếng này không" từ một canh bạc theo

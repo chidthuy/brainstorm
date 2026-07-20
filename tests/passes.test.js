@@ -22,7 +22,7 @@ describe('content pass', () => {
     expect(all).toContain('JSON');
   });
   it('parse validates shape', () => {
-    const good = { summary: 's', structure: [{ heading: 'h', gist: 'g' }], facts: ['f'], stance: ['q'] };
+    const good = { thesis: 't', summary: 's', structure: [{ heading: 'h', gist: 'g' }], facts: ['f'], stance: ['q'], caveats: ['c'] };
     expect(parseContent(JSON.stringify(good))).toEqual(good);
     expect(() => parseContent('{"summary": "s"}')).toThrow();
   });

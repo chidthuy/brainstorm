@@ -74,9 +74,19 @@ function renderReport(r) {
   const sc = $('#sec-content');
   sc.replaceChildren();
   if (r.content) {
-    sc.append(el('p', r.content.summary));
+    if (r.content.thesis) {
+      const t = el('p'); t.append(el('strong', 'Luận điểm: '), document.createTextNode(r.content.thesis));
+      sc.append(t);
+    }
+    for (const para of String(r.content.summary).split(/\n{2,}/)) {
+      if (para.trim()) sc.append(el('p', para.trim()));
+    }
     for (const s of r.content.structure) {
       sc.append(el('div', `${s.timestamp ? '[' + s.timestamp + '] ' : ''}${s.heading}: ${s.gist}`));
+    }
+    if (r.content.caveats && r.content.caveats.length) {
+      sc.append(el('h4', 'Điểm cần dè chừng'));
+      sc.append(list(r.content.caveats));
     }
   } else sc.append(el('p', r.errors.content ?? 'Không có dữ liệu', 'pass-error'));
 

@@ -8,14 +8,14 @@ const video = {
   comments: [{ text: 'great', likes: 1 }]
 };
 
-const CONTENT = { summary: 's', structure: [], facts: ['f1'], stance: [] };
+const CONTENT = { thesis: 't', summary: 's', structure: [], facts: ['f1'], stance: [], caveats: ['weak point'] };
 const FACTCHECK = { claims: [{ claim: 'f1', verdict: 'supported', note: '', sources: [] }] };
 const SOCIAL = { commentQuality: 'a', audienceProfile: 'b', buzz: 'c', dataGaps: [] };
 const VERDICT = { verdict: 'WATCH', confidence: 'high', reasons: ['r'] };
 
 function fakeClaude(byPass) {
   return async ({ system }) => {
-    if (system.includes('screening video')) return byPass.content ?? JSON.stringify(CONTENT);
+    if (system.includes('"thesis"')) return byPass.content ?? JSON.stringify(CONTENT);
     if (system.includes('fact-checker')) return byPass.factcheck ?? JSON.stringify(FACTCHECK);
     if (system.includes('social signals')) return byPass.social ?? JSON.stringify(SOCIAL);
     if (system.includes('verdict screening')) return byPass.compose ?? JSON.stringify(VERDICT);

@@ -11,7 +11,16 @@ web, **không cần biết code**. Mất khoảng 10 phút.
    *API Keys* → *Create Key*. Copy chuỗi bắt đầu bằng `sk-ant-...` (chỉ hiện
    một lần, lưu lại tạm).
 
-## Các bước
+## Cách nhanh nhất: nút một chạm
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fchidthuy%2Fbrainstorm&env=ANTHROPIC_API_KEY,APP_PASSWORD&envDescription=API%20key%20Claude%20va%20mat%20khau%20bao%20ve%20app)
+
+Bấm nút này → đăng nhập Vercel bằng GitHub → Vercel tự hỏi 2 giá trị
+`ANTHROPIC_API_KEY` và `APP_PASSWORD` → điền vào → Deploy. Xong.
+
+Nếu muốn làm thủ công thay vì bấm nút, theo các bước dưới đây.
+
+## Các bước (thủ công)
 
 ### 1. Import dự án
 - Vào https://vercel.com/new

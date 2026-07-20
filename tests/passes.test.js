@@ -31,7 +31,7 @@ describe('content pass', () => {
 describe('factcheck pass', () => {
   it('build attaches web_search tool', () => {
     const req = buildFactcheck({ content: { summary: 's', facts: ['claim 1'], stance: [] } });
-    expect(req.tools[0].type).toBe('web_search_20250305');
+    expect(req.tools[0].type).toBe('web_search_20260209');
   });
   it('parse validates verdict enum', () => {
     const good = { claims: [{ claim: 'c', verdict: 'supported', note: 'n', sources: ['http://x'] }] };

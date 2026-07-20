@@ -6,6 +6,14 @@ WATCH / SKIM / SKIP — quyết định "có đáng xem 2 tiếng không" trong 
 
 Tóm tắt là **bộ lọc**, không phải đường tắt: video hay thì vẫn nghe trọn.
 
+## Deploy nhanh
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fchidthuy%2Fbrainstorm&env=ANTHROPIC_API_KEY,APP_PASSWORD&envDescription=API%20key%20Claude%20va%20mat%20khau%20bao%20ve%20app)
+
+Bấm nút trên → đăng nhập Vercel bằng GitHub → khi được hỏi, điền
+`ANTHROPIC_API_KEY` (key `sk-ant-...`) và `APP_PASSWORD` (mật khẩu tự đặt) →
+Deploy. Chi tiết từng bước bằng tiếng Việt: [`DEPLOY.md`](DEPLOY.md).
+
 ## Chạy trên máy cá nhân
 
 ```bash

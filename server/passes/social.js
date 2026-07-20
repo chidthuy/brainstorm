@@ -15,7 +15,7 @@ export function buildSocial({ title, channel, viewCount, comments }) {
       role: 'user',
       content: `Video: "${title}" — kênh ${channel} — ${viewCount} views\n\nTop comments:\n${commentBlock}`
     }],
-    tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }]
+    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 3 }]
   };
 }
 

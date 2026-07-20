@@ -1,6 +1,6 @@
 import { extractJson } from '../claude.js';
 
-export function buildSocial({ title, channel, viewCount, comments }) {
+export function buildSocial({ title, channel, viewCount, comments, language }) {
   const commentBlock = comments.length
     ? comments.map(c => `[${c.likes} likes] ${c.text}`).join('\n')
     : '(không lấy được comment)';
@@ -8,9 +8,10 @@ export function buildSocial({ title, channel, viewCount, comments }) {
     system:
       'Bạn phân tích social signals quanh một video. Audience quality là proxy cho content quality. ' +
       'Đánh giá: (1) chất lượng comment — sâu sắc hay cảm thán, (2) chân dung người comment — ' +
-      'practitioner thật hay khán giả đại trà, (3) buzz — video/kênh được nhắc ở đâu, bối cảnh nào (dùng web search nếu cần). ' +
-      'Trả lời DUY NHẤT một JSON object: {"commentQuality": string, "audienceProfile": string, ' +
-      '"buzz": string, "dataGaps": [string]}. Ghi vào dataGaps những dữ liệu bị thiếu. Viết tiếng Việt.',
+      'practitioner thật hay khán giả đại trà, (3) độ lan toả — video/kênh được nhắc ở đâu, bối cảnh nào (dùng web search nếu cần). ' +
+      'Trả về DUY NHẤT một JSON object: {"commentQuality": string, "audienceProfile": string, ' +
+      '"buzz": string, "dataGaps": [string]}. Ghi vào dataGaps những dữ liệu bị thiếu. ' +
+      `Viết bằng ${language}.`,
     messages: [{
       role: 'user',
       content: `Video: "${title}" — kênh ${channel} — ${viewCount} views\n\nTop comments:\n${commentBlock}`

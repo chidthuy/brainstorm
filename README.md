@@ -40,12 +40,12 @@ Thiết kế cho serverless: mỗi lần screen chạy trọn trong một reques
 tiến độ trực tiếp về client — không có background job, không ghi file.
 
 - `server/ingest.js` — parse URL + lấy metadata/transcript/comments (youtubei.js, không cần YouTube API key)
-- `server/passes/` — 4 pass Claude: content, factcheck (web search), social (web search), compose verdict
-- `server/pipeline.js` — orchestrator: content → (factcheck ∥ social) → compose; pass lỗi không giết pipeline
-- `server/index.js` — Express app: endpoint `/api/screen` chạy pipeline và stream SSE trong một request; `express.static` cho frontend
+- `server/passes/` — các pass Claude: `content` (tác giả + tóm tắt bullet + outline theo mốc + stance + facts + trả lời câu hỏi tập trung), `factcheck` (soi từng fact: solid/weak/misleading/false, web search), `social` (web search), `recommend` (gợi ý video cùng chủ đề, web search), `compose` (chấm điểm 0-100), `ask` (hỏi tiếp sau báo cáo)
+- `server/pipeline.js` — orchestrator: content → (factcheck ∥ social ∥ recommend) → compose; pass lỗi không giết pipeline; ngôn ngữ + model chọn được per request
+- `server/index.js` — Express app: `/api/screen` (stream SSE), `/api/ask` (hỏi tiếp), `/api/config`; `express.static` cho frontend
 - `server/auth.js` — lớp mật khẩu (`APP_PASSWORD`)
 - `api/index.js` + `vercel.json` — export app làm Vercel serverless function
-- `public/` — frontend một trang; lịch sử lưu trong `localStorage` của trình duyệt
+- `public/` — frontend một trang (mood Spotify/podcast): input gọn + preview thumbnail, báo cáo có điểm số, fallback dán transcript, chat hỏi tiếp; lịch sử lưu trong `localStorage`
 
 Spec: `docs/superpowers/specs/2026-07-19-video-screening-assistant-design.md`
 

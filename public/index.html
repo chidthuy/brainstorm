@@ -7,40 +7,84 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <aside id="sidebar">
-    <h2>Lịch sử</h2>
-    <ul id="history"></ul>
-  </aside>
-  <main>
-    <h1>Screening Assistant</h1>
-    <p class="tagline">Quyết định "có đáng xem 2 tiếng không" trong 2 phút.</p>
-    <form id="screen-form">
-      <input id="password" type="password" placeholder="Mật khẩu" autocomplete="current-password" hidden>
-      <div class="row">
-        <input id="url" type="text" placeholder="Dán link YouTube..." required>
-        <button type="submit" id="go">Screen</button>
+  <div class="app">
+    <aside>
+      <h2>Đã soi</h2>
+      <ul class="hist" id="history"></ul>
+    </aside>
+
+    <main>
+      <h1 class="title">Screening Assistant</h1>
+      <p class="tagline">Soi nhanh trước khi bỏ 2 tiếng ra nghe.</p>
+
+      <form class="form" id="form" autocomplete="off">
+        <input id="password" type="password" placeholder="Mật khẩu" autocomplete="current-password" hidden>
+        <div class="mainrow">
+          <input id="url" type="text" placeholder="Dán link YouTube vào đây…" required>
+          <button class="go" id="go" type="submit">Soi</button>
+        </div>
+
+        <div class="preview" id="preview" hidden>
+          <div class="pthumb" id="pthumb"></div>
+          <div class="info">
+            <span class="srcpill">YOUTUBE</span>
+            <div class="ptitle" id="pTitle"></div>
+            <div class="pmeta" id="pMeta"></div>
+          </div>
+        </div>
+
+        <input id="q" class="qline" type="text" placeholder="Muốn soi kỹ điều gì? (tùy chọn)">
+        <div class="chips" id="chips">
+          <span class="chip">Luận điểm chính?</span>
+          <span class="chip">Số liệu có đáng tin?</span>
+          <span class="chip">Có gì mới không?</span>
+          <span class="chip">Chỗ nào nói quá?</span>
+        </div>
+
+        <button type="button" class="optToggle" id="optToggle" aria-expanded="false">Tùy chọn: ngôn ngữ · model ▾</button>
+        <div class="opts" id="opts" hidden>
+          <div><label for="lang">Ngôn ngữ tóm tắt</label>
+            <select id="lang">
+              <option value="Tiếng Việt">Tiếng Việt</option>
+              <option value="English">English</option>
+              <option value="cùng ngôn ngữ với transcript">Theo video</option>
+            </select></div>
+          <div><label for="model">Model AI</label>
+            <select id="model">
+              <option value="sonnet">Sonnet 5 — cân bằng (mặc định)</option>
+              <option value="opus">Opus 4.8 — kỹ nhất</option>
+              <option value="haiku">Haiku 4.5 — nhanh &amp; rẻ</option>
+            </select></div>
+        </div>
+      </form>
+
+      <div class="fallback" id="fallback" hidden>
+        <div class="fb-title">⚠ Không lấy được phụ đề của video này</div>
+        <p>Tôi đã thử nhưng không lấy được phụ đề (video tắt caption, hoặc YouTube tạm chặn). Dán transcript vào đây để tôi soi tiếp — hoặc xem hướng dẫn lấy nhanh.</p>
+        <textarea id="txPaste" placeholder="Dán transcript / lời thoại vào đây…"></textarea>
+        <details class="howto">
+          <summary>Cách lấy transcript trong 20 giây</summary>
+          <ol>
+            <li><b>YouTube:</b> dưới video bấm <b>“…” → “Show transcript”</b>, bôi đen toàn bộ, copy, dán vào ô trên.</li>
+            <li><b>Podcast / Spotify:</b> mở bản transcript của tập nếu có; hoặc dùng công cụ chuyển giọng nói → chữ rồi dán vào.</li>
+            <li>Không cần chuẩn từng chữ — có nội dung là tôi soi được.</li>
+          </ol>
+        </details>
+        <div class="fb-actions"><button class="go" id="fbRun" type="button">Soi với transcript này</button></div>
       </div>
-    </form>
-    <div id="transcript-box" hidden>
-      <p>Video này không có phụ đề. Dán transcript vào đây rồi bấm Screen lại:</p>
-      <textarea id="transcript" rows="6"></textarea>
-    </div>
-    <ol id="progress" hidden>
-      <li data-stage="ingest">Lấy dữ liệu video</li>
-      <li data-stage="content">Tóm tắt + facts/stance</li>
-      <li data-stage="factcheck">Fact-check</li>
-      <li data-stage="social">Social signals</li>
-      <li data-stage="compose">Verdict</li>
-    </ol>
-    <div id="error" class="error" hidden></div>
-    <section id="report" hidden>
-      <div id="verdict-card"></div>
-      <details open><summary>Tóm tắt nội dung</summary><div id="sec-content"></div></details>
-      <details open><summary>Facts vs. Stance</summary><div id="sec-facts"></div></details>
-      <details open><summary>Fact-check</summary><div id="sec-factcheck"></div></details>
-      <details open><summary>Social signals</summary><div id="sec-social"></div></details>
-    </section>
-  </main>
+
+      <ol class="steps" id="steps" hidden>
+        <li data-s="ingest">Lấy dữ liệu</li>
+        <li data-s="content">Summary</li>
+        <li data-s="factcheck">Fact-check</li>
+        <li data-s="social">Social</li>
+        <li data-s="score">Score</li>
+      </ol>
+
+      <div class="error" id="error" hidden></div>
+      <section class="report" id="report" hidden></section>
+    </main>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>

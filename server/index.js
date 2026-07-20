@@ -4,7 +4,8 @@ import { dirname, join } from 'node:path';
 import express from 'express';
 import { fetchVideoData } from './ingest.js';
 import { runScreening } from './pipeline.js';
-import { callClaude } from './claude.js';
+import { callClaude, resolveModel } from './claude.js';
+import { buildAsk } from './passes/ask.js';
 import { isAuthorized } from './auth.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,7 +28,7 @@ app.post('/api/screen', async (req, res) => {
     return res.status(401).json({ error: 'Sai mật khẩu' });
   }
 
-  const { url, transcriptOverride } = req.body ?? {};
+  const { url, transcriptOverride, question, language, model } = req.body ?? {};
   if (!url) return res.status(400).json({ error: 'Thiếu url' });
 
   let videoData;
@@ -37,6 +38,7 @@ app.post('/api/screen', async (req, res) => {
     return res.status(400).json({ error: `Không lấy được video: ${err.message}` });
   }
   if (transcriptOverride) videoData.transcriptOverride = transcriptOverride;
+  if (question) videoData.question = question;
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -46,17 +48,50 @@ app.post('/api/screen', async (req, res) => {
   const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
 
   send('meta', {
+    id: videoData.id,
     title: videoData.title,
+    channel: videoData.channel,
+    durationSec: videoData.durationSec,
+    viewCount: videoData.viewCount,
     hasTranscript: !!videoData.transcript
   });
 
+  // Không có phụ đề và user chưa dán transcript → mời user dán, không chạy pipeline rỗng.
+  if (!videoData.transcript && !videoData.transcriptOverride) {
+    send('needTranscript', { title: videoData.title });
+    return res.end();
+  }
+
   try {
-    const report = await runScreening(videoData, { callClaude }, send);
+    const report = await runScreening(
+      videoData,
+      { callClaude, language, model: resolveModel(model) },
+      send
+    );
     send('done', { report });
   } catch (err) {
     send('fatal', { error: String(err.message ?? err) });
   }
   res.end();
+});
+
+// Hỏi tiếp / phản hồi sau khi đã có báo cáo.
+app.post('/api/ask', async (req, res) => {
+  const provided = req.get('x-app-password') ?? req.body?.password;
+  if (!isAuthorized(PASSWORD, provided)) {
+    return res.status(401).json({ error: 'Sai mật khẩu' });
+  }
+  const { report, question, language, model } = req.body ?? {};
+  if (!question || !report) return res.status(400).json({ error: 'Thiếu câu hỏi hoặc báo cáo' });
+  try {
+    const answer = await callClaude({
+      ...buildAsk({ report, question, language }),
+      model: resolveModel(model)
+    });
+    res.json({ answer });
+  } catch (err) {
+    res.status(500).json({ error: String(err.message ?? err) });
+  }
 });
 
 // Chỉ nghe cổng khi chạy local. Trên Vercel, app được export làm handler.

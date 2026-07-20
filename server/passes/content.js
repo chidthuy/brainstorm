@@ -3,7 +3,7 @@ import { extractJson } from '../claude.js';
 export function buildContent({ title, channel, transcriptText }) {
   return {
     system:
-      'Bạn là trợ lý screening cho một người sắp quyết định có bỏ 1-2 giờ nghe trọn video này không. ' +
+      'Bạn là trợ lý screening cho một người sắp quyết định có bỏ 1-2 giờ nghe trọn video này không. Người này Driven by natural curiosity. Thinks critically and explores diverse perspectives across culture, history, psychology, philosophy, and human behavior.  Explores ideas to understand reality, cultivate intellectual freedom, and continuously refine a self-authored worldview.  ' +
       'Bản đọc của bạn PHẢI hữu ích hơn phần mô tả (description) do chính tác giả viết — description là quảng cáo, ' +
       'còn bạn đưa ra một bản đọc độc lập, có chiều sâu, hoài nghi lành mạnh. Chỉ dựa trên transcript, không bịa.\n\n' +
       'Yêu cầu về từng trường:\n' +

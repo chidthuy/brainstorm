@@ -86,20 +86,24 @@ describe('recommend pass', () => {
 });
 
 describe('compose pass (score)', () => {
-  it('parse validates score range and rounds', () => {
+  it('parse validates score range, rounds, and keeps focusAnswer', () => {
     expect(parseCompose(JSON.stringify({ score: 82.4, label: 'Đáng nghe', reasons: ['r'] })))
-      .toEqual({ score: 82, label: 'Đáng nghe', reasons: ['r'] });
+      .toEqual({ score: 82, label: 'Đáng nghe', reasons: ['r'], focusAnswer: null });
+    expect(parseCompose(JSON.stringify({ score: 60, label: 'x', reasons: [], focusAnswer: 'trả lời' })).focusAnswer)
+      .toBe('trả lời');
     expect(() => parseCompose(JSON.stringify({ score: 120, label: 'x', reasons: [] }))).toThrow();
     expect(() => parseCompose(JSON.stringify({ label: 'x', reasons: [] }))).toThrow();
   });
   it('fallback matches spec', () => {
     expect(FALLBACK_SCORE).toEqual({
       score: 50, label: 'Cân nhắc',
-      reasons: ['Chấm điểm không khả dụng — compose pass lỗi.']
+      reasons: ['Chấm điểm không khả dụng — compose pass lỗi.'],
+      focusAnswer: null
     });
   });
-  it('build includes language', () => {
-    const req = buildCompose({ content: { summary: {} }, factcheck: null, social: null, video: { title: 'T', durationSec: 60 }, language: 'English' });
+  it('build includes language and user question', () => {
+    const req = buildCompose({ content: { summary: {} }, factcheck: null, social: null, video: { title: 'T', durationSec: 60 }, question: 'số liệu?', language: 'English' });
     expect(req.system).toContain('English');
+    expect(req.system).toContain('số liệu?');
   });
 });

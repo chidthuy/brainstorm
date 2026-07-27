@@ -58,13 +58,23 @@ export async function fetchVideoData(url) {
       .slice(0, 60);
   } catch { /* comment tắt hoặc lỗi */ }
 
+  // view_count đôi khi thiếu trong basic_info khi YouTube giới hạn IP server —
+  // thử lấy từ primary_info; 0 nghĩa là "không rõ", KHÔNG phải video 0 view.
+  let viewCount = Number(basic.view_count ?? 0);
+  if (!viewCount) {
+    const t = info.primary_info?.view_count?.view_count?.text ??
+      info.primary_info?.view_count?.text ?? '';
+    const digits = String(t).replace(/[^0-9]/g, '');
+    if (digits) viewCount = Number(digits);
+  }
+
   return {
     id,
     title: basic.title ?? info.primary_info?.title?.text ?? '(không rõ tiêu đề)',
     channel: basic.author ?? basic.channel?.name ??
       info.secondary_info?.owner?.author?.name ?? '(không rõ kênh)',
     durationSec: Number(basic.duration ?? 0),
-    viewCount: Number(basic.view_count ?? 0),
+    viewCount,
     transcript,
     comments
   };

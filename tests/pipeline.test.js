@@ -16,7 +16,7 @@ const CONTENT = {
 const FACTCHECK = { claims: [{ claim: 'f1', verdict: 'solid', note: '', sources: [] }] };
 const SOCIAL = { commentQuality: 'a', audienceProfile: 'b', buzz: 'c', dataGaps: [] };
 const RECOMMEND = { items: [{ title: 'x', channel: 'c', url: 'http://x', why: 'w' }] };
-const SCORE = { score: 82, label: 'Đáng nghe trọn', reasons: ['r'] };
+const SCORE = { score: 82, label: 'Đáng nghe trọn', reasons: ['r'], focusAnswer: null };
 
 function fakeClaude(byPass) {
   return async ({ system }) => {

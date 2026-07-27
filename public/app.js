@@ -53,9 +53,10 @@ function renderReport(r) {
     const { card: c, body } = card('Summary');
     if (r.content) {
       const ct = r.content;
-      if (r.question && ct.focusAnswer) {
+      const focusAnswer = r.score?.focusAnswer || ct.focusAnswer;
+      if (r.question && focusAnswer) {
         const a = el('div', null, 'answer');
-        a.append(el('div', '↳ ' + r.question, 'q'), document.createTextNode(ct.focusAnswer));
+        a.append(el('div', '↳ ' + r.question, 'q'), document.createTextNode(focusAnswer));
         body.append(a);
       }
       const au = el('div', null, 'kv'); au.append(el('div', 'Tác giả', 'k'), el('div', ct.author)); body.append(au);

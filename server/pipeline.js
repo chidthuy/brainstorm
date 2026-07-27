@@ -88,7 +88,8 @@ export async function runScreening(videoData, deps, emit) {
     const text = await deps.callClaude({
       ...buildCompose({
         content: report.content, factcheck: report.factcheck,
-        social: report.social, video: report.video, language
+        social: report.social, video: report.video,
+        question: videoData.question, language
       }),
       model: deps.model
     });

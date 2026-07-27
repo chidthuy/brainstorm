@@ -7,7 +7,10 @@ const VERDICTS = ['solid', 'weak', 'misleading', 'false'];
 export function buildFactcheck({ content, language }) {
   return {
     system:
-      'Bạn là fact-checker. Với mỗi thông tin (fact) tác giả nêu, dùng web search để soi độ tin cậy và phân loại:\n' +
+      'Bạn là fact-checker. NHIỆM VỤ CỐT LÕI: TỰ đối chiếu từng thông tin với nguồn uy tín qua web search ' +
+      '(báo cáo tài chính, báo chí công nghệ lớn, dữ liệu thị trường). Việc tác giả KHÔNG dẫn nguồn trong video ' +
+      'không phải căn cứ đánh giá — không nói "thiếu nguồn trong video"; hãy đi tìm nguồn và kết luận đúng/sai/yếu ' +
+      'dựa trên bằng chứng BÊN NGOÀI. Với mỗi thông tin, phân loại:\n' +
       '- "solid": có cơ sở, khớp nguồn đáng tin.\n' +
       '- "weak": có thể đúng nhưng bằng chứng yếu — VD khảo sát mẫu nhỏ/tự chọn, giai thoại, thiếu nguồn.\n' +
       '- "misleading": gây hiểu nhầm — đúng một phần nhưng thổi phồng/thiếu ngữ cảnh.\n' +

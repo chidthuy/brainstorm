@@ -30,6 +30,24 @@ export function capTranscript(text) {
     '\n[... transcript quá dài, phần sau đã bị cắt — báo cáo dựa trên phần đầu ...]';
 }
 
+// Transcript dán từ khung "Show transcript" của YouTube có mốc thời gian ở
+// DÒNG RIÊNG ("0:45" rồi xuống dòng mới tới nội dung). Gộp lại thành "[0:45] nội dung"
+// để model dựng outline có mốc chuẩn.
+const TS_LINE = /^\(?(\d{1,2}:\d{2}(?::\d{2})?)\)?$/;
+export function normalizePastedTranscript(text) {
+  const lines = String(text).replace(/\r/g, '').split('\n').map(l => l.trim());
+  const out = [];
+  let pending = null;
+  for (const line of lines) {
+    if (!line) continue;
+    const m = line.match(TS_LINE);
+    if (m) { pending = m[1]; continue; }
+    out.push(pending ? `[${pending}] ${line}` : line);
+    pending = null;
+  }
+  return out.join('\n');
+}
+
 export async function runStep(step, payload = {}, opts = {}, deps = {}) {
   const language = opts.language || 'Tiếng Việt';
   const model = opts.model;
@@ -54,7 +72,7 @@ export async function runStep(step, payload = {}, opts = {}, deps = {}) {
       return run(
         buildContent({
           title: payload.title, channel: payload.channel,
-          transcriptText: capTranscript(String(payload.transcriptText ?? '')),
+          transcriptText: capTranscript(normalizePastedTranscript(payload.transcriptText ?? '')),
           question: payload.question, language
         }),
         parseContent

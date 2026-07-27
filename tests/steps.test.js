@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { runStep, transcriptWithTimes, capTranscript, MAX_TRANSCRIPT_CHARS } from '../server/steps.js';
+import {
+  runStep, transcriptWithTimes, capTranscript, normalizePastedTranscript, MAX_TRANSCRIPT_CHARS
+} from '../server/steps.js';
 import { parseIsoDuration } from '../server/ingest.js';
 
 const CONTENT = {
@@ -27,6 +29,16 @@ describe('transcript helpers', () => {
     ]);
     expect(out).toContain('[0:45] a');
     expect(out).toContain('[1:02:03] b');
+  });
+  it('merges YouTube panel timestamps onto their text line', () => {
+    const pasted = '0:00\nGiới thiệu chương trình\n12:30\nBa xu hướng nền tảng\n1:02:03\nPhản biện';
+    expect(normalizePastedTranscript(pasted)).toBe(
+      '[0:00] Giới thiệu chương trình\n[12:30] Ba xu hướng nền tảng\n[1:02:03] Phản biện'
+    );
+  });
+  it('leaves already-tagged or plain transcripts intact', () => {
+    expect(normalizePastedTranscript('[0:45] xin chào')).toBe('[0:45] xin chào');
+    expect(normalizePastedTranscript('một đoạn văn xuôi\ndòng hai')).toBe('một đoạn văn xuôi\ndòng hai');
   });
   it('caps overly long transcripts', () => {
     const long = 'x'.repeat(MAX_TRANSCRIPT_CHARS + 500);

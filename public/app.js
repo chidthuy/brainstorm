@@ -197,7 +197,10 @@ function setStage(stage, cls) { const li = stepsEl.querySelector(`li[data-s="${s
 function setStepsDone() { stepsEl.hidden = false; for (const li of stepEls()) li.className = 'ok'; }
 function resetSteps() { stepsEl.hidden = false; for (const li of stepEls()) li.className = ''; setStage('ingest', 'active'); }
 
+let streamFinished = false;
+
 function handleEvent(event, data) {
+  if (event === 'done' || event === 'fatal' || event === 'needTranscript') streamFinished = true;
   if (event === 'meta') {
     setStage('ingest', 'ok');
     $('#preview').hidden = false;
@@ -258,7 +261,12 @@ async function runScreen(transcriptOverride) {
     });
   } catch (err) { return showError('Không gọi được server: ' + err.message); }
   if (!res.ok) { const d = await res.json().catch(() => ({ error: 'Lỗi không rõ' })); return showError(d.error); }
+  streamFinished = false;
   try { await readStream(res); } catch (err) { showError('Mất kết nối khi đang soi: ' + err.message); }
+  if (!streamFinished) {
+    for (const li of stepEls()) if (li.className === 'active') li.className = 'fail';
+    showError('Server dừng giữa chừng — thường do video quá dài vượt thời gian cho phép. Thử lại lần nữa, chọn model Haiku (nhanh hơn) trong Tùy chọn, hoặc soi video ngắn hơn.');
+  }
   $('#go').disabled = false;
 }
 

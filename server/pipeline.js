@@ -13,8 +13,13 @@ function fmtTime(ms) {
 }
 
 // Ghép transcript kèm mốc thời gian để model dựng outline chính xác.
+// Cắt bớt nếu quá dài để pipeline không vượt giới hạn thời gian serverless.
+const MAX_TRANSCRIPT_CHARS = 150000;
 function transcriptWithTimes(segments) {
-  return segments.map(s => `[${fmtTime(s.start ?? 0)}] ${s.text}`).join('\n');
+  const full = segments.map(s => `[${fmtTime(s.start ?? 0)}] ${s.text}`).join('\n');
+  if (full.length <= MAX_TRANSCRIPT_CHARS) return full;
+  return full.slice(0, MAX_TRANSCRIPT_CHARS) +
+    '\n[... transcript quá dài, phần sau đã bị cắt — báo cáo dựa trên phần đầu ...]';
 }
 
 async function runPass(name, build, parse, deps, emit, report) {

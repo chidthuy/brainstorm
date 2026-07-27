@@ -60,8 +60,9 @@ export async function fetchVideoData(url) {
 
   return {
     id,
-    title: basic.title ?? '(không rõ tiêu đề)',
-    channel: basic.author ?? '(không rõ kênh)',
+    title: basic.title ?? info.primary_info?.title?.text ?? '(không rõ tiêu đề)',
+    channel: basic.author ?? basic.channel?.name ??
+      info.secondary_info?.owner?.author?.name ?? '(không rõ kênh)',
     durationSec: Number(basic.duration ?? 0),
     viewCount: Number(basic.view_count ?? 0),
     transcript,

@@ -45,6 +45,7 @@ export async function runStep(step, payload = {}, opts = {}, deps = {}) {
           durationSec: v.durationSec, viewCount: v.viewCount
         },
         hasTranscript: !!v.transcript,
+        transcriptSource: v.transcriptSource ?? null,
         transcriptText: v.transcript ? transcriptWithTimes(v.transcript) : null,
         comments: v.comments ?? []
       };

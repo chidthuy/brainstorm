@@ -1,4 +1,5 @@
 import { Innertube } from 'youtubei.js';
+import { fetchTranscript } from './transcript.js';
 
 const ID_RE = /^[A-Za-z0-9_-]{11}$/;
 
@@ -78,25 +79,31 @@ export async function fetchVideoData(url) {
     try { meta = await fetchViaDataApi(id, apiKey); } catch { /* fallback youtubei */ }
   }
 
-  // youtubei.js: nguồn duy nhất cho transcript; fallback cho metadata/comments khi không có key.
+  // Transcript: thử nhiều đường (android/ios player, trang watch, rồi youtubei.js).
+  const viaLibrary = async () => {
+    const tube = await getYt();
+    const info = await tube.getInfo(id);
+    const t = await info.getTranscript();
+    const segs = t?.transcript?.content?.body?.initial_segments ?? [];
+    return segs
+      .map(s => ({ text: s.snippet?.text ?? '', start: Number(s.start_ms ?? 0) }))
+      .filter(s => s.text.trim());
+  };
   let transcript = null;
+  let transcriptSource = null;
+  try {
+    const got = await fetchTranscript(id, viaLibrary);
+    if (got) { transcript = got.segments; transcriptSource = got.source; }
+  } catch { /* không lấy được — client sẽ mời dán tay */ }
+
+  // youtubei.js: fallback cho metadata/comments khi không có YOUTUBE_API_KEY.
   let ytMeta = null;
   let ytComments = [];
-  try {
+  if (!meta) try {
     const tube = await getYt();
     const info = await tube.getInfo(id);
     const basic = info.basic_info;
-
-    try {
-      const t = await info.getTranscript();
-      const segs = t?.transcript?.content?.body?.initial_segments ?? [];
-      const mapped = segs
-        .map(s => ({ text: s.snippet?.text ?? '', start: Number(s.start_ms ?? 0) }))
-        .filter(s => s.text.trim());
-      if (mapped.length) transcript = mapped;
-    } catch { /* video không có captions */ }
-
-    if (!meta) {
+    {
       let viewCount = Number(basic.view_count ?? 0);
       if (!viewCount) {
         const t = info.primary_info?.view_count?.view_count?.text ??
@@ -123,9 +130,8 @@ export async function fetchVideoData(url) {
       } catch { /* comment tắt hoặc bị chặn */ }
     }
   } catch (err) {
-    // youtubei chết hẳn: nếu Data API đã có metadata thì vẫn tiếp tục (transcript
-    // sẽ null → client mời dán tay); không thì báo lỗi.
-    if (!meta) throw err;
+    // youtubei bị chặn hẳn và cũng không có Data API → không có metadata nào.
+    if (!transcript) throw err;
   }
 
   const m = meta ?? ytMeta ?? {
@@ -138,6 +144,7 @@ export async function fetchVideoData(url) {
     durationSec: m.durationSec,
     viewCount: m.viewCount,
     transcript,
+    transcriptSource,
     comments: meta ? meta.comments : ytComments
   };
 }

@@ -59,19 +59,60 @@
   <script>
     // Bookmarklet chạy trong ngữ cảnh trang youtube.com nên fetch phụ đề là
     // same-origin (không vướng CORS) và dùng chính IP/cookie của bạn.
-    const code = `(async()=>{try{
+    const code = `(async()=>{
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+var fmt=function(ms){var s=Math.floor(ms/1000),m=Math.floor(s/60),ss=String(s%60).padStart(2,'0');return m>=60?Math.floor(m/60)+':'+String(m%60).padStart(2,'0')+':'+ss:m+':'+ss};
+var lines=function(a){return a.filter(function(x){return x.text}).map(function(x){return '['+x.ts+'] '+x.text.replace(/\\s+/g,' ').trim()}).join('\\n')};
+var out='';var tried=[];
+
+/* 1) Tai truc tiep file phu de */
+try{
 var pr=window.ytInitialPlayerResponse;
 if(!pr&&window.ytplayer&&ytplayer.config&&ytplayer.config.args&&ytplayer.config.args.player_response){pr=JSON.parse(ytplayer.config.args.player_response)}
 var tr=pr&&pr.captions&&pr.captions.playerCaptionsTracklistRenderer&&pr.captions.playerCaptionsTracklistRenderer.captionTracks;
-if(!tr||!tr.length){alert('Video nay khong co phu de.');return}
+if(tr&&tr.length){
 var pick=tr.slice().sort(function(a,b){return (b.kind==='asr'?0:10)-(a.kind==='asr'?0:10)})[0];
-var r=await fetch(pick.baseUrl+'&fmt=json3');var j=await r.json();
-var f=function(ms){var s=Math.floor(ms/1000),m=Math.floor(s/60),ss=String(s%60).padStart(2,'0');return m>=60?Math.floor(m/60)+':'+String(m%60).padStart(2,'0')+':'+ss:m+':'+ss};
-var out=(j.events||[]).filter(function(e){return e.segs}).map(function(e){return '['+f(e.tStartMs||0)+'] '+e.segs.map(function(s){return s.utf8||''}).join('').replace(/\\s+/g,' ').trim()}).filter(function(l){return l.length>6}).join('\\n');
-if(!out){alert('Khong doc duoc noi dung phu de.');return}
+for(var i=0;i<3&&!out;i++){
+var u=pick.baseUrl+['&fmt=json3','','&fmt=srv1'][i];
+try{var r=await fetch(u,{credentials:'include'});var txt=await r.text();
+if(txt&&txt.trim()){
+if(txt.charAt(0)==='{'){var j=JSON.parse(txt);out=lines((j.events||[]).filter(function(e){return e.segs}).map(function(e){return {ts:fmt(e.tStartMs||0),text:e.segs.map(function(s){return s.utf8||''}).join('')}}))}
+else{var d=new DOMParser().parseFromString(txt,'text/xml');out=lines([].slice.call(d.getElementsByTagName('text')).map(function(n){return {ts:fmt(Math.round(parseFloat(n.getAttribute('start')||0)*1000)),text:n.textContent}}))}
+}}catch(e){}
+}}
+}catch(e){}
+if(!out)tried.push('tai file');
+
+/* 2) Goi API get_transcript ma chinh YouTube dung */
+if(!out)try{
+var key=window.ytcfg&&ytcfg.get('INNERTUBE_API_KEY');var ctx=window.ytcfg&&ytcfg.get('INNERTUBE_CONTEXT');
+var mm=JSON.stringify(window.ytInitialData||{}).match(/"getTranscriptEndpoint":\\{"params":"([^"]+)"/);
+if(key&&ctx&&mm){
+var rr=await fetch('/youtubei/v1/get_transcript?key='+key,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:ctx,params:mm[1]})});
+var jj=await rr.json();var segs=[];
+(function walk(o){if(!o||typeof o!=='object')return;if(o.transcriptSegmentRenderer){var t=o.transcriptSegmentRenderer;segs.push({ts:fmt(Number(t.startMs||0)),text:t.snippet&&t.snippet.runs?t.snippet.runs.map(function(x){return x.text}).join(''):''})}for(var k in o)walk(o[k])})(jj);
+out=lines(segs);
+}}catch(e){}
+if(!out)tried.push('api noi bo');
+
+/* 3) Mo khung transcript cua YouTube va doc thang tren man hinh */
+if(!out)try{
+var scrape=function(){return lines([].slice.call(document.querySelectorAll('ytd-transcript-segment-renderer')).map(function(el){
+var a=el.querySelector('.segment-timestamp')||el.querySelector('[class*=timestamp]');
+var b=el.querySelector('.segment-text')||el.querySelector('[class*=segment-text]');
+return {ts:a?a.textContent.trim():'',text:b?b.textContent.trim():''}}))};
+out=scrape();
+if(!out){
+var btn=[].slice.call(document.querySelectorAll('button,tp-yt-paper-item,yt-formatted-string')).filter(function(x){
+var s=((x.getAttribute&&x.getAttribute('aria-label'))||'')+' '+(x.textContent||'');return /transcript|b\\u1ea3n ch\\u00e9p|ph\\u1ee5 \\u0111\\u1ec1/i.test(s)&&s.length<80})[0];
+if(btn){btn.click();for(var w=0;w<12&&!out;w++){await sleep(700);out=scrape()}}
+}}catch(e){}
+if(!out)tried.push('khung tren man hinh');
+
+if(!out){alert('Khong lay duoc transcript. Da thu: '+tried.join(', ')+'.\\n\\nCach thu cong: bam \\u201c...\\u201d duoi video > \\u201cShow transcript\\u201d, boi den toan bo khung ben phai roi Ctrl+C.');return}
 try{await navigator.clipboard.writeText(out);alert('Da copy transcript ('+out.length+' ky tu). Dan vao Screening Assistant.')}
 catch(e){var t=document.createElement('textarea');t.value=out;t.style.cssText='position:fixed;z-index:99999;top:5%;left:5%;width:90%;height:80%';document.body.appendChild(t);t.select();alert('Bam Ctrl+C de copy, roi dong o nay.')}
-}catch(e){alert('Loi: '+e.message)}})()`;
+})()`;
     document.getElementById('bm').href = 'javascript:' + encodeURIComponent(code);
   </script>
 </body>

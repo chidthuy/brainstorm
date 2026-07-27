@@ -83,22 +83,22 @@ export function pickTrack(tracks, prefer = ['vi', 'en']) {
 
 // ---------- tải nội dung một track ----------
 
+// YouTube hay trả 200 kèm body RỖNG cho đường này — đọc text trước rồi mới
+// quyết định parse kiểu gì, và thử vài biến thể định dạng.
 async function fetchTrack(baseUrl) {
   const sep = baseUrl.includes('?') ? '&' : '?';
-  try {
-    const r = await get(baseUrl + sep + 'fmt=json3', { 'User-Agent': DESKTOP_UA });
-    if (r.ok) {
-      const segs = parseJson3(await r.json());
+  for (const suffix of [sep + 'fmt=json3', '', sep + 'fmt=srv1']) {
+    try {
+      const r = await get(baseUrl + suffix, { 'User-Agent': DESKTOP_UA });
+      if (!r.ok) continue;
+      const text = (await r.text()).trim();
+      if (!text) continue;
+      const segs = text.startsWith('{')
+        ? parseJson3(JSON.parse(text))
+        : parseXmlCaptions(text);
       if (segs.length) return segs;
-    }
-  } catch { /* thử XML */ }
-  try {
-    const r = await get(baseUrl, { 'User-Agent': DESKTOP_UA });
-    if (r.ok) {
-      const segs = parseXmlCaptions(await r.text());
-      if (segs.length) return segs;
-    }
-  } catch { /* hết cách cho track này */ }
+    } catch { /* thử biến thể kế tiếp */ }
+  }
   return null;
 }
 

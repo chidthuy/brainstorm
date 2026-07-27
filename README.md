@@ -14,7 +14,7 @@ Bấm nút trên → đăng nhập Vercel bằng GitHub → khi được hỏi, 
 `ANTHROPIC_API_KEY` (key `sk-ant-...`) và `APP_PASSWORD` (mật khẩu tự đặt) →
 Deploy. Chi tiết từng bước bằng tiếng Việt: [`DEPLOY.md`](DEPLOY.md).
 
-## Chạy trên máy cá nhân
+## Chạy trên máy cá nhân (ổn định nhất — xem [`RUN-LOCAL.md`](RUN-LOCAL.md))
 
 ```bash
 npm install
@@ -36,8 +36,12 @@ Xem hướng dẫn từng bước (không cần biết code) trong [`DEPLOY.md`]
 
 ## Kiến trúc
 
-Thiết kế cho serverless: mỗi lần screen chạy trọn trong một request và stream
-tiến độ trực tiếp về client — không có background job, không ghi file.
+Thiết kế cho serverless: mỗi BƯỚC phân tích là một request riêng (`/api/step`)
+do client điều phối — mỗi bước có trọn giới hạn thời gian của nó, 3 bước
+web-search chạy song song, tổng thời gian screening không bị trần nào chặn.
+`server/steps.js` là bộ điều phối bước; `server/pipeline.js` cũ đã bỏ.
+Có `YOUTUBE_API_KEY` (tùy chọn) thì metadata + comment lấy qua YouTube Data API
+chính thức — ổn định từ IP máy chủ.
 
 - `server/ingest.js` — parse URL + lấy metadata/transcript/comments (youtubei.js, không cần YouTube API key)
 - `server/passes/` — các pass Claude: `content` (tác giả + tóm tắt bullet + outline theo mốc + stance + facts + trả lời câu hỏi tập trung), `factcheck` (soi từng fact: solid/weak/misleading/false, web search), `social` (web search), `recommend` (gợi ý video cùng chủ đề, web search), `compose` (chấm điểm 0-100), `ask` (hỏi tiếp sau báo cáo)

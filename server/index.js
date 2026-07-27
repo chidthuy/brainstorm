@@ -2,8 +2,7 @@ import 'dotenv/config';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import express from 'express';
-import { fetchVideoData } from './ingest.js';
-import { runScreening } from './pipeline.js';
+import { runStep } from './steps.js';
 import { callClaude, resolveModel } from './claude.js';
 import { buildAsk } from './passes/ask.js';
 import { isAuthorized } from './auth.js';
@@ -12,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PASSWORD = process.env.APP_PASSWORD || '';
 
 const app = express();
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '4mb' }));
 app.use(express.static(join(__dirname, '..', 'public')));
 
 // Cho client biết có cần mật khẩu không (để hiện ô nhập).
@@ -20,59 +19,22 @@ app.get('/api/config', (_req, res) => {
   res.json({ requiresPassword: !!PASSWORD });
 });
 
-// Chạy toàn bộ screening trong MỘT request và stream tiến độ trực tiếp về client
-// (hợp với serverless: không có background job, không lưu file).
-app.post('/api/screen', async (req, res) => {
+// Mỗi bước phân tích là một request riêng — client điều phối trình tự,
+// nên tổng thời gian screening không bị giới hạn thời gian serverless chặn.
+app.post('/api/step', async (req, res) => {
   const provided = req.get('x-app-password') ?? req.body?.password;
   if (!isAuthorized(PASSWORD, provided)) {
     return res.status(401).json({ error: 'Sai mật khẩu' });
   }
-
-  const { url, transcriptOverride, question, language, model } = req.body ?? {};
-  if (!url) return res.status(400).json({ error: 'Thiếu url' });
-
-  let videoData;
+  const { step, payload, language, model } = req.body ?? {};
+  if (!step) return res.status(400).json({ error: 'Thiếu step' });
   try {
-    videoData = await fetchVideoData(url);
+    const data = await runStep(step, payload, { language, model: resolveModel(model) });
+    res.json({ data });
   } catch (err) {
-    return res.status(400).json({ error: `Không lấy được video: ${err.message}` });
+    const msg = String(err.message ?? err);
+    res.status(step === 'ingest' ? 400 : 500).json({ error: msg });
   }
-  if (transcriptOverride) videoData.transcriptOverride = transcriptOverride;
-  if (question) videoData.question = question;
-
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders?.();
-
-  const send = (event, payload) => res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
-
-  send('meta', {
-    id: videoData.id,
-    title: videoData.title,
-    channel: videoData.channel,
-    durationSec: videoData.durationSec,
-    viewCount: videoData.viewCount,
-    hasTranscript: !!videoData.transcript
-  });
-
-  // Không có phụ đề và user chưa dán transcript → mời user dán, không chạy pipeline rỗng.
-  if (!videoData.transcript && !videoData.transcriptOverride) {
-    send('needTranscript', { title: videoData.title });
-    return res.end();
-  }
-
-  try {
-    const report = await runScreening(
-      videoData,
-      { callClaude, language, model: resolveModel(model) },
-      send
-    );
-    send('done', { report });
-  } catch (err) {
-    send('fatal', { error: String(err.message ?? err) });
-  }
-  res.end();
 });
 
 // Hỏi tiếp / phản hồi sau khi đã có báo cáo.

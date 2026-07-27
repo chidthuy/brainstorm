@@ -15,7 +15,6 @@ function card(title) {
   d.append(s, body);
   return { card: d, body };
 }
-function fmtMin(sec) { return Math.round((sec || 0) / 60) + ' phút'; }
 function scoreClass(n) { return n >= 70 ? 'hi' : n >= 45 ? 'mid' : 'lo'; }
 function scoreColor(n) { return n >= 70 ? 'var(--ok)' : n >= 45 ? 'var(--warn)' : 'var(--bad)'; }
 function pillClass(n) { return n >= 70 ? 'sp-hi' : n >= 45 ? 'sp-mid' : 'sp-lo'; }
@@ -152,7 +151,6 @@ function renderReport(r) {
     root.append(c);
   }
 
-  // follow-up chat
   root.append(buildFollowup());
   root.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -191,56 +189,73 @@ async function sendFollowup(text) {
   } catch (err) { bot.textContent = 'Không gọi được server: ' + err.message; }
 }
 
-// ---------- steps ----------
+// ---------- steps + progress ----------
 const stepsEl = $('#steps');
 function stepEls() { return [...stepsEl.querySelectorAll('li')]; }
 function setStage(stage, cls) { const li = stepsEl.querySelector(`li[data-s="${stage}"]`); if (li) li.className = cls; }
-function setStepsDone() { stepsEl.hidden = false; for (const li of stepEls()) li.className = 'ok'; }
-function resetSteps() { stepsEl.hidden = false; for (const li of stepEls()) li.className = ''; setStage('ingest', 'active'); }
+function setStepsDone() { stepsEl.hidden = false; $('#pwrap').hidden = true; for (const li of stepEls()) li.className = 'ok'; }
+function resetSteps() { stepsEl.hidden = false; for (const li of stepEls()) li.className = ''; }
 
-let streamFinished = false;
+// Trọng số % của từng bước — cộng dồn khi bước xong; ticker nhích dần khi đang chạy.
+const WEIGHTS = { ingest: 8, content: 40, factcheck: 15, social: 13, recommend: 12, compose: 12 };
+const EST_SECONDS = { ingest: 10, content: 100, factcheck: 70, social: 60, recommend: 50, compose: 30 };
+let progressBase = 0;
+let running = {};   // step -> start time
+let ticker = null;
 
-function handleEvent(event, data) {
-  if (event === 'done' || event === 'fatal' || event === 'needTranscript') streamFinished = true;
-  if (event === 'meta') {
-    setStage('ingest', 'ok');
-    $('#preview').hidden = false;
-    $('#pTitle').textContent = data.title || '';
-    $('#pMeta').textContent = [data.channel, data.durationSec ? Math.floor(data.durationSec / 60) + ' phút' : null,
-      data.viewCount ? data.viewCount.toLocaleString() + ' views' : null].filter(Boolean).join(' · ');
-    const thumb = $('#pthumb'); thumb.replaceChildren();
-    if (data.id) { const img = el('img'); img.src = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`; img.alt = ''; img.onerror = () => img.remove(); thumb.append(img); }
-  } else if (event === 'needTranscript') {
-    stepsEl.hidden = true;
-    $('#fallback').hidden = false;
-    $('#fallback').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    $('#go').disabled = false;
-  } else if (event === 'stage') {
-    setStage(data.stage, 'active');
-  } else if (event === 'pass') {
-    setStage(data.pass, data.ok ? 'ok' : 'fail');
-  } else if (event === 'done') {
-    renderReport(data.report); saveHistory(data.report); renderHistory();
-  } else if (event === 'fatal') {
-    showError(data.error);
+function progressNow() {
+  let p = progressBase;
+  const now = Date.now();
+  for (const [step, t0] of Object.entries(running)) {
+    const frac = Math.min((now - t0) / 1000 / EST_SECONDS[step], 0.92);
+    p += WEIGHTS[step] * frac;
   }
+  return Math.min(Math.round(p), 99);
+}
+function paintProgress(note) {
+  const p = progressNow();
+  $('#pfill').style.width = p + '%';
+  $('#ppct').textContent = p + '%';
+  if (note) $('#pnote').textContent = note;
+}
+function startProgress() {
+  progressBase = 0; running = {};
+  $('#pwrap').hidden = false;
+  paintProgress('bắt đầu…');
+  ticker = setInterval(() => paintProgress(), 800);
+}
+function stepStart(step, note) { running[step] = Date.now(); setStage(step, 'active'); if (note) $('#pnote').textContent = note; }
+function stepEnd(step, ok) {
+  delete running[step];
+  progressBase += WEIGHTS[step];
+  setStage(step, ok ? 'ok' : 'fail');
+  paintProgress();
+}
+function stopProgress(finalNote) {
+  clearInterval(ticker); ticker = null; running = {};
+  $('#pfill').style.width = '100%'; $('#ppct').textContent = '100%';
+  if (finalNote) $('#pnote').textContent = finalNote;
 }
 
-async function readStream(res) {
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const blocks = buffer.split('\n\n'); buffer = blocks.pop();
-    for (const block of blocks) {
-      const ev = block.split('\n').find(l => l.startsWith('event:'));
-      const dl = block.split('\n').find(l => l.startsWith('data:'));
-      if (ev && dl) handleEvent(ev.slice(6).trim(), JSON.parse(dl.slice(5).trim()));
-    }
-  }
+// ---------- orchestration: mỗi bước một request ----------
+async function callStep(step, payload) {
+  const res = await fetch('/api/step', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-App-Password': $('#password').value },
+    body: JSON.stringify({ step, payload, language: $('#lang').value, model: $('#model').value })
+  });
+  const d = await res.json().catch(() => ({ error: 'Server trả dữ liệu không hợp lệ' }));
+  if (!res.ok) throw new Error(d.error || (step + ' lỗi'));
+  return d.data;
+}
+
+function showMeta(video, hasTranscript) {
+  $('#preview').hidden = false;
+  $('#pTitle').textContent = video.title || '';
+  $('#pMeta').textContent = [video.channel, video.durationSec ? Math.floor(video.durationSec / 60) + ' phút' : null,
+    video.viewCount ? video.viewCount.toLocaleString() + ' views' : null].filter(Boolean).join(' · ');
+  const thumb = $('#pthumb'); thumb.replaceChildren();
+  if (video.id) { const img = el('img'); img.src = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`; img.alt = ''; img.onerror = () => img.remove(); thumb.append(img); }
 }
 
 async function runScreen(transcriptOverride) {
@@ -248,25 +263,88 @@ async function runScreen(transcriptOverride) {
   $('#error').hidden = true;
   $('#report').hidden = true;
   $('#fallback').hidden = true;
-  resetSteps();
-  const body = {
-    url: $('#url').value, question: $('#q').value.trim() || undefined,
-    language: $('#lang').value, model: $('#model').value
+  resetSteps(); startProgress();
+
+  const question = $('#q').value.trim() || undefined;
+  const report = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+    createdAt: new Date().toISOString(),
+    video: null, question: question ?? null,
+    content: null, factcheck: null, social: null, recommend: null, score: null,
+    errors: {}
   };
-  if (transcriptOverride) body.transcriptOverride = transcriptOverride;
-  let res;
+
   try {
-    res = await fetch('/api/screen', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Password': $('#password').value },
-      body: JSON.stringify(body)
-    });
-  } catch (err) { return showError('Không gọi được server: ' + err.message); }
-  if (!res.ok) { const d = await res.json().catch(() => ({ error: 'Lỗi không rõ' })); return showError(d.error); }
-  streamFinished = false;
-  try { await readStream(res); } catch (err) { showError('Mất kết nối khi đang soi: ' + err.message); }
-  if (!streamFinished) {
-    for (const li of stepEls()) if (li.className === 'active') li.className = 'fail';
-    showError('Server dừng giữa chừng — thường do video quá dài vượt thời gian cho phép. Thử lại lần nữa, chọn model Haiku (nhanh hơn) trong Tùy chọn, hoặc soi video ngắn hơn.');
+    // 1. Ingest
+    stepStart('ingest', 'lấy dữ liệu video…');
+    let ing;
+    try {
+      ing = await callStep('ingest', { url: $('#url').value });
+    } catch (err) { stepEnd('ingest', false); throw err; }
+    stepEnd('ingest', true);
+    report.video = ing.video;
+    showMeta(ing.video, ing.hasTranscript);
+
+    const transcriptText = transcriptOverride || ing.transcriptText;
+    if (!transcriptText) {
+      stopProgress('cần transcript');
+      $('#fallback').hidden = false;
+      $('#fallback').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('#go').disabled = false;
+      return;
+    }
+
+    // 2. Content (nặng nhất)
+    stepStart('content', 'đọc transcript, dựng tóm tắt…');
+    try {
+      report.content = await callStep('content', {
+        title: ing.video.title, channel: ing.video.channel, transcriptText, question
+      });
+      stepEnd('content', true);
+    } catch (err) { report.errors.content = err.message; stepEnd('content', false); }
+
+    // 3. Song song: factcheck + social + recommend (mỗi cái một request riêng)
+    const jobs = [];
+    if (report.content) {
+      stepStart('factcheck', 'đối chiếu nguồn ngoài…');
+      jobs.push(callStep('factcheck', { content: report.content })
+        .then(d => { report.factcheck = d; stepEnd('factcheck', true); })
+        .catch(err => { report.errors.factcheck = err.message; stepEnd('factcheck', false); }));
+      stepStart('recommend', 'tìm video cùng chủ đề…');
+      jobs.push(callStep('recommend', { title: ing.video.title, theme: report.content.summary?.theme ?? ing.video.title })
+        .then(d => { report.recommend = d; stepEnd('recommend', true); })
+        .catch(err => { report.errors.recommend = err.message; stepEnd('recommend', false); }));
+    } else {
+      stepEnd('factcheck', false); stepEnd('recommend', false);
+    }
+    stepStart('social', 'đọc tín hiệu cộng đồng…');
+    jobs.push(callStep('social', {
+      title: ing.video.title, channel: ing.video.channel,
+      viewCount: ing.video.viewCount, comments: ing.comments
+    })
+      .then(d => { report.social = d; stepEnd('social', true); })
+      .catch(err => { report.errors.social = err.message; stepEnd('social', false); }));
+    await Promise.allSettled(jobs);
+
+    // 4. Compose
+    stepStart('compose', 'chấm điểm…');
+    try {
+      report.score = await callStep('compose', {
+        content: report.content, factcheck: report.factcheck,
+        social: report.social, video: report.video, question
+      });
+      stepEnd('compose', true);
+    } catch (err) {
+      report.errors.compose = err.message;
+      report.score = { score: 50, label: 'Cân nhắc', reasons: ['Chấm điểm không khả dụng.'], focusAnswer: null };
+      stepEnd('compose', false);
+    }
+
+    stopProgress('xong ✓');
+    renderReport(report); saveHistory(report); renderHistory();
+  } catch (err) {
+    stopProgress('lỗi');
+    showError(err.message);
   }
   $('#go').disabled = false;
 }

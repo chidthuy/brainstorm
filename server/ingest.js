@@ -24,6 +24,44 @@ export function parseVideoId(url) {
   throw new Error('Không nhận diện được link YouTube');
 }
 
+export function parseIsoDuration(iso = '') {
+  const m = String(iso).match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  return m ? (Number(m[1] || 0) * 3600 + Number(m[2] || 0) * 60 + Number(m[3] || 0)) : 0;
+}
+
+// YouTube Data API v3 chính thức — hoạt động ổn định từ IP máy chủ (Vercel),
+// lấy được metadata + comment mà youtubei.js hay bị chặn.
+async function fetchViaDataApi(id, key) {
+  const base = 'https://www.googleapis.com/youtube/v3';
+  const vRes = await fetch(`${base}/videos?part=snippet,statistics,contentDetails&id=${id}&key=${key}`);
+  if (!vRes.ok) throw new Error('YouTube Data API lỗi ' + vRes.status);
+  const v = (await vRes.json()).items?.[0];
+  if (!v) throw new Error('Video không tồn tại hoặc bị ẩn');
+
+  let comments = [];
+  try {
+    const cRes = await fetch(
+      `${base}/commentThreads?part=snippet&videoId=${id}&order=relevance&maxResults=60&textFormat=plainText&key=${key}`
+    );
+    if (cRes.ok) {
+      comments = ((await cRes.json()).items ?? [])
+        .map(it => ({
+          text: it.snippet?.topLevelComment?.snippet?.textDisplay ?? '',
+          likes: Number(it.snippet?.topLevelComment?.snippet?.likeCount ?? 0)
+        }))
+        .filter(c => c.text.trim());
+    }
+  } catch { /* comment tắt hoặc quota — không chặn flow */ }
+
+  return {
+    title: v.snippet?.title ?? '(không rõ tiêu đề)',
+    channel: v.snippet?.channelTitle ?? '(không rõ kênh)',
+    viewCount: Number(v.statistics?.viewCount ?? 0),
+    durationSec: parseIsoDuration(v.contentDetails?.duration),
+    comments
+  };
+}
+
 let yt = null;
 async function getYt() {
   if (!yt) yt = await Innertube.create({ generate_session_locally: true });
@@ -32,50 +70,74 @@ async function getYt() {
 
 export async function fetchVideoData(url) {
   const id = parseVideoId(url);
-  const tube = await getYt();
-  const info = await tube.getInfo(id);
-  const basic = info.basic_info;
 
-  let transcript = null;
-  try {
-    const t = await info.getTranscript();
-    const segs = t?.transcript?.content?.body?.initial_segments ?? [];
-    const mapped = segs
-      .map(s => ({ text: s.snippet?.text ?? '', start: Number(s.start_ms ?? 0) }))
-      .filter(s => s.text.trim());
-    if (mapped.length) transcript = mapped;
-  } catch { /* video không có captions */ }
-
-  let comments = [];
-  try {
-    const c = await tube.getComments(id, 'TOP_COMMENTS');
-    comments = (c.contents ?? [])
-      .map(th => ({
-        text: th.comment?.content?.toString() ?? '',
-        likes: Number(th.comment?.like_count ?? 0) || 0
-      }))
-      .filter(x => x.text.trim())
-      .slice(0, 60);
-  } catch { /* comment tắt hoặc lỗi */ }
-
-  // view_count đôi khi thiếu trong basic_info khi YouTube giới hạn IP server —
-  // thử lấy từ primary_info; 0 nghĩa là "không rõ", KHÔNG phải video 0 view.
-  let viewCount = Number(basic.view_count ?? 0);
-  if (!viewCount) {
-    const t = info.primary_info?.view_count?.view_count?.text ??
-      info.primary_info?.view_count?.text ?? '';
-    const digits = String(t).replace(/[^0-9]/g, '');
-    if (digits) viewCount = Number(digits);
+  // Ưu tiên Data API chính thức cho metadata + comments (nếu có key).
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  let meta = null;
+  if (apiKey) {
+    try { meta = await fetchViaDataApi(id, apiKey); } catch { /* fallback youtubei */ }
   }
 
+  // youtubei.js: nguồn duy nhất cho transcript; fallback cho metadata/comments khi không có key.
+  let transcript = null;
+  let ytMeta = null;
+  let ytComments = [];
+  try {
+    const tube = await getYt();
+    const info = await tube.getInfo(id);
+    const basic = info.basic_info;
+
+    try {
+      const t = await info.getTranscript();
+      const segs = t?.transcript?.content?.body?.initial_segments ?? [];
+      const mapped = segs
+        .map(s => ({ text: s.snippet?.text ?? '', start: Number(s.start_ms ?? 0) }))
+        .filter(s => s.text.trim());
+      if (mapped.length) transcript = mapped;
+    } catch { /* video không có captions */ }
+
+    if (!meta) {
+      let viewCount = Number(basic.view_count ?? 0);
+      if (!viewCount) {
+        const t = info.primary_info?.view_count?.view_count?.text ??
+          info.primary_info?.view_count?.text ?? '';
+        const digits = String(t).replace(/[^0-9]/g, '');
+        if (digits) viewCount = Number(digits);
+      }
+      ytMeta = {
+        title: basic.title ?? info.primary_info?.title?.text ?? '(không rõ tiêu đề)',
+        channel: basic.author ?? basic.channel?.name ??
+          info.secondary_info?.owner?.author?.name ?? '(không rõ kênh)',
+        durationSec: Number(basic.duration ?? 0),
+        viewCount
+      };
+      try {
+        const c = await tube.getComments(id, 'TOP_COMMENTS');
+        ytComments = (c.contents ?? [])
+          .map(th => ({
+            text: th.comment?.content?.toString() ?? '',
+            likes: Number(th.comment?.like_count ?? 0) || 0
+          }))
+          .filter(x => x.text.trim())
+          .slice(0, 60);
+      } catch { /* comment tắt hoặc bị chặn */ }
+    }
+  } catch (err) {
+    // youtubei chết hẳn: nếu Data API đã có metadata thì vẫn tiếp tục (transcript
+    // sẽ null → client mời dán tay); không thì báo lỗi.
+    if (!meta) throw err;
+  }
+
+  const m = meta ?? ytMeta ?? {
+    title: '(không rõ tiêu đề)', channel: '(không rõ kênh)', durationSec: 0, viewCount: 0
+  };
   return {
     id,
-    title: basic.title ?? info.primary_info?.title?.text ?? '(không rõ tiêu đề)',
-    channel: basic.author ?? basic.channel?.name ??
-      info.secondary_info?.owner?.author?.name ?? '(không rõ kênh)',
-    durationSec: Number(basic.duration ?? 0),
-    viewCount,
+    title: m.title,
+    channel: m.channel,
+    durationSec: m.durationSec,
+    viewCount: m.viewCount,
     transcript,
-    comments
+    comments: meta ? meta.comments : ytComments
   };
 }

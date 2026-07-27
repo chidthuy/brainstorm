@@ -27,16 +27,27 @@ Nếu muốn làm thủ công thay vì bấm nút, theo các bước dưới đ�
 - Chọn repo **`chidthuy/brainstorm`** trong danh sách → bấm **Import**.
   (Nếu chưa thấy, bấm "Adjust GitHub App Permissions" để cho Vercel xem repo này.)
 
-### 2. Đặt 2 biến môi trường (Environment Variables)
-Trước khi bấm Deploy, mở mục **Environment Variables** và thêm 2 dòng:
+### 2. Đặt biến môi trường (Environment Variables)
+Trước khi bấm Deploy, mở mục **Environment Variables** và thêm:
 
-| Name (tên) | Value (giá trị) |
-|---|---|
-| `ANTHROPIC_API_KEY` | dán key `sk-ant-...` của bạn |
-| `APP_PASSWORD` | tự đặt một mật khẩu, ví dụ `caiphe2026` |
+| Name (tên) | Value (giá trị) | Bắt buộc? |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | dán key `sk-ant-...` của bạn | ✅ |
+| `APP_PASSWORD` | tự đặt một mật khẩu, ví dụ `caiphe2026` | ✅ |
+| `YOUTUBE_API_KEY` | key YouTube Data API (cách tạo bên dưới) | Nên có |
 
 > `APP_PASSWORD` chính là mật khẩu để mở app sau này. Ai không biết nó thì
 > không dùng được, nên không đốt được tiền API của bạn.
+
+#### Tạo `YOUTUBE_API_KEY` (miễn phí, ~3 phút — giúp lấy comment/metadata ổn định)
+1. Vào https://console.cloud.google.com → đăng nhập Google → chấp nhận điều khoản.
+2. Thanh trên cùng → **Select a project → New Project** → đặt tên bất kỳ → Create.
+3. Vào **APIs & Services → Library** → tìm **"YouTube Data API v3"** → **Enable**.
+4. Vào **APIs & Services → Credentials** → **Create Credentials → API key** → copy key.
+5. Dán vào Vercel làm biến `YOUTUBE_API_KEY`.
+
+(Không có key này app vẫn chạy, nhưng phần comment/social hay bị YouTube chặn
+trên máy chủ Vercel.)
 
 ### 3. Deploy
 - Bấm **Deploy**, chờ ~1 phút.
@@ -50,11 +61,12 @@ Trước khi bấm Deploy, mở mục **Environment Variables** và thêm 2 dòn
 
 - **Tiền:** mỗi lần screen tốn một ít tiền trong tài khoản Claude API của bạn
   (đọc transcript + tra web). Video càng dài, càng nhiều claim thì càng tốn.
-- **Giới hạn thời gian:** gói Vercel miễn phí cắt mỗi lần chạy ở **60 giây**.
-  Video rất dài có thể chưa phân tích xong đã bị cắt. Nếu hay gặp, nâng lên
-  gói **Vercel Pro** rồi sửa số `60` thành `300` trong file `vercel.json`.
-- **YouTube đôi khi chặn:** máy chủ Vercel dùng IP trung tâm, thỉnh thoảng
-  YouTube không cho lấy dữ liệu. Khi đó bạn dán transcript thủ công vào ô hiện ra.
+- **Thời gian:** mỗi bước phân tích chạy thành một request riêng nên tổng thời
+  gian không bị giới hạn — video vài tiếng vẫn soi được, chỉ là chờ lâu hơn
+  (có thanh % tiến độ).
+- **YouTube đôi khi chặn transcript:** máy chủ Vercel dùng IP trung tâm, có lúc
+  YouTube không cho lấy phụ đề. Khi đó dán transcript thủ công vào ô hiện ra —
+  hoặc chạy local trên máy bạn ([`RUN-LOCAL.md`](RUN-LOCAL.md)) là ổn định nhất.
 - **Đổi mật khẩu:** vào dự án trên Vercel → Settings → Environment Variables →
   sửa `APP_PASSWORD` → Redeploy.
 

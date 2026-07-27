@@ -1,0 +1,81 @@
+import { describe, it, expect } from 'vitest';
+import { runStep, transcriptWithTimes, capTranscript, MAX_TRANSCRIPT_CHARS } from '../server/steps.js';
+import { parseIsoDuration } from '../server/ingest.js';
+
+const CONTENT = {
+  author: 'a',
+  summary: { theme: 't', highlights: 'h', conclusion: 'c', takeaway: 'k' },
+  outline: [{ timestamp: '0:45', point: 'p' }],
+  stance: ['s'], facts: ['f1'], focusAnswer: null
+};
+const FACTCHECK = { claims: [{ claim: 'f1', verdict: 'solid', note: '', sources: [] }] };
+const SOCIAL = { commentQuality: 'a', audienceProfile: 'b', buzz: 'c', dataGaps: [] };
+const RECOMMEND = { items: [{ title: 'x', channel: 'c', url: 'http://x', why: 'w' }] };
+const SCORE = { score: 82, label: 'Đáng nghe trọn', reasons: ['r'], focusAnswer: 'đáp' };
+
+function fakeClaude(response) {
+  const calls = [];
+  const fn = async (build) => { calls.push(build); return JSON.stringify(response); };
+  fn.calls = calls;
+  return fn;
+}
+
+describe('transcript helpers', () => {
+  it('formats timestamps m:ss and h:mm:ss', () => {
+    const out = transcriptWithTimes([
+      { text: 'a', start: 45000 }, { text: 'b', start: 3723000 }
+    ]);
+    expect(out).toContain('[0:45] a');
+    expect(out).toContain('[1:02:03] b');
+  });
+  it('caps overly long transcripts', () => {
+    const long = 'x'.repeat(MAX_TRANSCRIPT_CHARS + 500);
+    const capped = capTranscript(long);
+    expect(capped.length).toBeLessThan(long.length);
+    expect(capped).toContain('đã bị cắt');
+  });
+});
+
+describe('parseIsoDuration', () => {
+  it('parses ISO8601 durations', () => {
+    expect(parseIsoDuration('PT2H4M10S')).toBe(7450);
+    expect(parseIsoDuration('PT15M')).toBe(900);
+    expect(parseIsoDuration('')).toBe(0);
+  });
+});
+
+describe('runStep', () => {
+  it('content step passes question + language into prompt', async () => {
+    const cc = fakeClaude(CONTENT);
+    const data = await runStep('content',
+      { title: 'T', channel: 'C', transcriptText: 'xin chào', question: 'chi phí?' },
+      { language: 'English' }, { callClaude: cc });
+    expect(data).toEqual(CONTENT);
+    expect(cc.calls[0].system).toContain('English');
+    expect(cc.calls[0].system).toContain('chi phí?');
+  });
+
+  it('factcheck step validates verdict enum', async () => {
+    const data = await runStep('factcheck', { content: CONTENT }, {}, { callClaude: fakeClaude(FACTCHECK) });
+    expect(data).toEqual(FACTCHECK);
+  });
+
+  it('social step tolerates empty comments', async () => {
+    const cc = fakeClaude(SOCIAL);
+    const data = await runStep('social', { title: 'T', channel: 'C', viewCount: 0, comments: [] }, {}, { callClaude: cc });
+    expect(data).toEqual(SOCIAL);
+    expect(JSON.stringify(cc.calls[0].messages)).toContain('KHÔNG lấy được comment');
+  });
+
+  it('recommend and compose steps round-trip', async () => {
+    expect(await runStep('recommend', { title: 'T', theme: 'ai' }, {}, { callClaude: fakeClaude(RECOMMEND) }))
+      .toEqual(RECOMMEND);
+    expect(await runStep('compose',
+      { content: CONTENT, factcheck: FACTCHECK, social: SOCIAL, video: { title: 'T', durationSec: 60 }, question: 'q' },
+      {}, { callClaude: fakeClaude(SCORE) })).toEqual(SCORE);
+  });
+
+  it('rejects unknown steps', async () => {
+    await expect(runStep('hack', {}, {}, { callClaude: fakeClaude({}) })).rejects.toThrow('không hợp lệ');
+  });
+});

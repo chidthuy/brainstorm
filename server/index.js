@@ -6,6 +6,7 @@ import { runStep } from './steps.js';
 import { callClaude, resolveModel } from './claude.js';
 import { buildAsk } from './passes/ask.js';
 import { isAuthorized } from './auth.js';
+import { friendlyError } from './errors.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PASSWORD = process.env.APP_PASSWORD || '';
@@ -32,8 +33,8 @@ app.post('/api/step', async (req, res) => {
     const data = await runStep(step, payload, { language, model: resolveModel(model) });
     res.json({ data });
   } catch (err) {
-    const msg = String(err.message ?? err);
-    res.status(step === 'ingest' ? 400 : 500).json({ error: msg });
+    res.status(step === 'ingest' ? 400 : 500)
+      .json({ error: friendlyError(err.message ?? err) });
   }
 });
 
@@ -52,7 +53,7 @@ app.post('/api/ask', async (req, res) => {
     });
     res.json({ answer });
   } catch (err) {
-    res.status(500).json({ error: String(err.message ?? err) });
+    res.status(500).json({ error: friendlyError(err.message ?? err) });
   }
 });
 

@@ -85,11 +85,13 @@ export function pickTrack(tracks, prefer = ['vi', 'en']) {
 
 // YouTube hay trả 200 kèm body RỖNG cho đường này — đọc text trước rồi mới
 // quyết định parse kiểu gì, và thử vài biến thể định dạng.
-async function fetchTrack(baseUrl) {
+// QUAN TRỌNG: link phụ đề gắn với client đã xin nó, nên phải tải lại bằng ĐÚNG
+// User-Agent của client đó, không thì YouTube trả về rỗng.
+async function fetchTrack(baseUrl, ua = DESKTOP_UA) {
   const sep = baseUrl.includes('?') ? '&' : '?';
   for (const suffix of [sep + 'fmt=json3', '', sep + 'fmt=srv1']) {
     try {
-      const r = await get(baseUrl + suffix, { 'User-Agent': DESKTOP_UA });
+      const r = await get(baseUrl + suffix, { 'User-Agent': ua });
       if (!r.ok) continue;
       const text = (await r.text()).trim();
       if (!text) continue;
@@ -104,18 +106,29 @@ async function fetchTrack(baseUrl) {
 
 // ---------- các đường lấy phụ đề ----------
 
-// 1) Gọi endpoint player nội bộ với client di động — đường ít bị chặn nhất.
-async function viaInnertube(id, client) {
-  const cfg = client === 'IOS'
-    ? { clientName: 'IOS', clientVersion: '19.09.3', ua: IOS_UA, num: '5' }
-    : { clientName: 'ANDROID', clientVersion: '19.09.37', ua: ANDROID_UA, num: '3', androidSdkVersion: 30 };
+// Các client nội bộ của YouTube. Client di động/TV ít bị chặn hơn client web.
+export const CLIENTS = {
+  ANDROID: { clientName: 'ANDROID', clientVersion: '19.09.37', ua: ANDROID_UA, num: '3', extra: { androidSdkVersion: 30 } },
+  IOS: { clientName: 'IOS', clientVersion: '19.09.3', ua: IOS_UA, num: '5', extra: {} },
+  TV: {
+    clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER', clientVersion: '2.0', num: '85',
+    ua: 'Mozilla/5.0 (PlayStation; PlayStation 4/12.00) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15',
+    extra: { clientScreen: 'EMBED' }
+  }
+};
+
+// 1) Gọi endpoint player nội bộ, rồi tải phụ đề bằng ĐÚNG danh tính client đó.
+async function viaInnertube(id, clientKey) {
+  const cfg = CLIENTS[clientKey];
   const body = {
     context: {
       client: {
         clientName: cfg.clientName, clientVersion: cfg.clientVersion,
-        hl: 'en', gl: 'US',
-        ...(cfg.androidSdkVersion ? { androidSdkVersion: cfg.androidSdkVersion } : {})
-      }
+        hl: 'en', gl: 'US', ...cfg.extra
+      },
+      ...(clientKey === 'TV'
+        ? { thirdParty: { embedUrl: `https://www.youtube.com/watch?v=${id}` } }
+        : {})
     },
     videoId: id, contentCheckOk: true, racyCheckOk: true
   };
@@ -134,7 +147,7 @@ async function viaInnertube(id, client) {
   const data = await r.json();
   const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
   const track = pickTrack(tracks);
-  return track?.baseUrl ? fetchTrack(track.baseUrl) : null;
+  return track?.baseUrl ? fetchTrack(track.baseUrl, cfg.ua) : null;
 }
 
 // 2) Tải HTML trang watch rồi bóc captionTracks.
@@ -145,7 +158,9 @@ async function viaWatchPage(id) {
   });
   if (!r.ok) return null;
   const track = pickTrack(extractCaptionTracks(await r.text()));
-  return track?.baseUrl ? fetchTrack(decodeEntities(track.baseUrl).replace(/\\u0026/g, '&')) : null;
+  return track?.baseUrl
+    ? fetchTrack(decodeEntities(track.baseUrl).replace(/\\u0026/g, '&'), DESKTOP_UA)
+    : null;
 }
 
 /**
@@ -156,6 +171,7 @@ export async function fetchTranscript(id, viaLibrary) {
   const strategies = [
     ['android', () => viaInnertube(id, 'ANDROID')],
     ['ios', () => viaInnertube(id, 'IOS')],
+    ['tv-embed', () => viaInnertube(id, 'TV')],
     ['watch-page', () => viaWatchPage(id)],
     ...(viaLibrary ? [['youtubei', viaLibrary]] : [])
   ];

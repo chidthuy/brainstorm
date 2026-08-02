@@ -83,3 +83,17 @@ describe('pickTrack', () => {
     expect(pickTrack(null)).toBeNull();
   });
 });
+
+describe('client configs', () => {
+  it('each client carries its own User-Agent so caption URLs are fetched with a matching identity', async () => {
+    const { CLIENTS } = await import('../server/transcript.js');
+    for (const key of ['ANDROID', 'IOS', 'TV']) {
+      expect(CLIENTS[key].ua).toBeTruthy();
+      expect(CLIENTS[key].clientName).toBeTruthy();
+      expect(CLIENTS[key].num).toBeTruthy();
+    }
+    // UA phải khác nhau giữa các client — đây chính là chỗ trước đây bị dùng nhầm
+    const uas = new Set(['ANDROID', 'IOS', 'TV'].map(k => CLIENTS[k].ua));
+    expect(uas.size).toBe(3);
+  });
+});

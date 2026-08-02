@@ -19,8 +19,9 @@ export function buildCompose({ content, factcheck, social, video, question, lang
       'Cân nhắc: nội dung dày/mỏng, lập luận chặt/lỏng, độ tin cậy của các fact (nhiều fact yếu/sai thì trừ mạnh), ' +
       'và chất lượng audience. Điểm cao = rất đáng nghe; thấp = nên bỏ qua.\n\n' +
       'QUY TẮC: nếu dữ liệu social (comment/lượt xem) bị thiếu do lỗi kỹ thuật (xem dataGaps), ' +
-      'BỎ QUA tiêu chí đó — không trừ điểm, không nêu "thiếu dữ liệu social" làm lý do. ' +
-      'Reasons viết ngắn, cụ thể, không disclaimer thừa.\n\n' +
+      'BỎ QUA tiêu chí đó — không trừ điểm, không nêu "thiếu dữ liệu social" làm lý do.\n' +
+      'NGẮN GỌN: mỗi reason tối đa 20 từ, vào thẳng lý do, không mở đầu bằng "Video này", ' +
+      '"Có thể thấy", "Đáng chú ý là". focusAnswer tối đa 60 từ.\n\n' +
       'Trả về DUY NHẤT một JSON object: {"score": number (0-100), "label": string (nhãn ngắn: VD "Đáng nghe trọn", "Nghe lướt", "Bỏ qua"), ' +
       '"reasons": [string], "focusAnswer": string|null} với 2-3 reasons. ' +
       `Viết bằng ${language}.` + focus,

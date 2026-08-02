@@ -19,7 +19,7 @@ function fmtTime(ms) {
 
 // Ghép transcript kèm mốc [m:ss]; cắt nếu quá dài (≈4-5 giờ nói) để một pass
 // không vượt giới hạn thời gian của chính nó.
-export const MAX_TRANSCRIPT_CHARS = 250000;
+export const MAX_TRANSCRIPT_CHARS = 600000;
 export function transcriptWithTimes(segments) {
   const full = segments.map(s => `[${fmtTime(s.start ?? 0)}] ${s.text}`).join('\n');
   return capTranscript(full);

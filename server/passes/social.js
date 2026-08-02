@@ -13,7 +13,9 @@ export function buildSocial({ title, channel, viewCount, comments, language }) {
       'QUY TẮC QUAN TRỌNG: dữ liệu comment/lượt xem có thể KHÔNG lấy được vì lý do kỹ thuật (server bị YouTube giới hạn). ' +
       'Thiếu dữ liệu KHÔNG có nghĩa video 0 view hay không ai quan tâm — TUYỆT ĐỐI không suy diễn tiêu cực từ việc thiếu. ' +
       'Khi thiếu: ghi ngắn gọn vào dataGaps, và đánh giá dựa trên những gì tra được về kênh/chủ đề qua web search. ' +
-      'Viết xúc tích, không lặp lại ý "thiếu dữ liệu" trong nhiều trường.\n\n' +
+      'Không lặp lại ý "thiếu dữ liệu" trong nhiều trường.\n\n' +
+      'NGẮN GỌN: mỗi trường commentQuality/audienceProfile/buzz tối đa 35 từ, mỗi dataGaps tối đa 15 từ ' +
+      'và nhiều nhất 3 mục. Vào thẳng kết luận, không kể lể quá trình tìm kiếm.\n\n' +
       'Trả về DUY NHẤT một JSON object: {"commentQuality": string, "audienceProfile": string, ' +
       '"buzz": string, "dataGaps": [string]}. ' +
       `Viết bằng ${language}.`,

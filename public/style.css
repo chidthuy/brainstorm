@@ -99,6 +99,14 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .content-bullets { margin: .2rem 0 0; padding-left: 1.15rem; }
 .content-bullets li { margin: .32rem 0; }
 .content-bullets .lead { color: var(--muted); }
+.sub-bullets { margin: .3rem 0 .1rem; padding-left: 1.1rem; list-style: '– '; }
+.sub-bullets li { margin: .3rem 0; }
+
+.retry-row { display: flex; gap: .6rem; margin-top: .8rem; flex-wrap: wrap; }
+.retry-row .go { padding: .55rem 1.2rem; font-size: .88rem; }
+.ghost-btn { padding: .55rem 1.2rem; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--text); font-size: .88rem; cursor: pointer; font-family: var(--sans); }
+.ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
 .answer { border: 1px solid #1f5c33; background: #0f2417; border-radius: 10px; padding: .7rem .85rem; margin: .3rem 0 .2rem; }
 .answer .q { font-size: .8rem; color: var(--accent); margin-bottom: .3rem; }
 

@@ -80,13 +80,7 @@ export async function runStep(step, payload = {}, opts = {}, deps = {}) {
     case 'factcheck':
       return run(buildFactcheck({ content: payload.content, language }), parseFactcheck);
     case 'social':
-      return run(
-        buildSocial({
-          title: payload.title, channel: payload.channel,
-          viewCount: payload.viewCount, comments: payload.comments ?? [], language
-        }),
-        parseSocial
-      );
+      return run(buildSocial({ comments: payload.comments ?? [], language }), parseSocial);
     case 'recommend':
       return run(buildRecommend({ title: payload.title, theme: payload.theme, language }), parseRecommend);
     case 'compose':

@@ -61,9 +61,16 @@ function renderReport(r) {
       const au = el('div', null, 'kv'); au.append(el('div', 'Tác giả', 'k'), el('div', ct.author)); body.append(au);
       const sm = el('div', null, 'kv'); sm.append(el('div', 'Nội dung chính', 'k'));
       const ul = el('ul', null, 'content-bullets');
-      const rows = [['Chủ đề:', ct.summary.theme], ['Điểm nổi bật:', ct.summary.highlights],
-                    ['Kết luận / insight:', ct.summary.conclusion], ['Bạn sẽ rút ra:', ct.summary.takeaway]];
-      for (const [lead, val] of rows) { const li = el('li'); li.append(el('span', lead + ' ', 'lead'), document.createTextNode(val)); ul.append(li); }
+      const line = (lead, val) => { const li = el('li'); li.append(el('span', lead + ' ', 'lead'), document.createTextNode(val)); return li; };
+      ul.append(line('Chủ đề:', ct.summary.theme));
+      // Điểm nổi bật: danh sách con để dễ quét mắt
+      const hi = el('li'); hi.append(el('span', 'Điểm nổi bật:', 'lead'));
+      const sub = el('ul', null, 'sub-bullets');
+      const hs = Array.isArray(ct.summary.highlights) ? ct.summary.highlights : [ct.summary.highlights];
+      for (const h of hs) sub.append(el('li', h));
+      hi.append(sub); ul.append(hi);
+      ul.append(line('Kết luận / insight:', ct.summary.conclusion));
+      ul.append(line('Bạn sẽ rút ra:', ct.summary.takeaway));
       sm.append(ul); body.append(sm);
 
       const sc = r.score || { score: 50, label: '—', reasons: [] };
@@ -96,7 +103,6 @@ function renderReport(r) {
   // 3. Stance
   if (r.content) {
     const { card: c, body } = card('Stance');
-    body.append(el('p', 'Lập trường / quan điểm của tác giả — không kiểm chứng đúng-sai được:'));
     const ul = el('ul', null, 'stance');
     for (const s of r.content.stance) ul.append(el('li', '“' + s + '”'));
     if (!r.content.stance.length) ul.append(el('li', '(không có)'));
@@ -128,8 +134,23 @@ function renderReport(r) {
   {
     const { card: c, body } = card('Social signals');
     if (r.social) {
-      const rows = [['Chất lượng comment', r.social.commentQuality], ['Chân dung audience', r.social.audienceProfile], ['Độ lan toả', r.social.buzz]];
-      for (const [k, v] of rows) { const d = el('div', null, 'social-row'); d.append(el('span', k, 'k'), el('span', v)); body.append(d); }
+      const s = r.social.sentiment ?? {};
+      const SENT = { 'Tích cực': 'hi', 'Tiêu cực': 'lo', 'Trái chiều': 'mid' };
+      const row = el('div', null, 'social-row');
+      row.append(el('span', 'Sentiment', 'k'));
+      const val = el('span');
+      val.append(el('b', s.label ?? 'Không rõ', SENT[s.label] ?? ''));
+      if (s.why) val.append(document.createTextNode(' — ' + s.why));
+      row.append(val); body.append(row);
+
+      const nrow = el('div', null, 'social-row');
+      nrow.append(el('span', 'Phản hồi đáng kể', 'k'));
+      if (r.social.notable?.length) {
+        const ul = el('ul', null, 'stance');
+        for (const n of r.social.notable) ul.append(el('li', n));
+        nrow.append(ul);
+      } else nrow.append(el('span', 'Không có phản hồi nào đáng kể — chủ yếu là cảm thán.'));
+      body.append(nrow);
       if (r.social.dataGaps?.length) body.append(el('p', 'Thiếu dữ liệu: ' + r.social.dataGaps.join('; '), 'pass-error'));
     } else body.append(el('p', r.errors.social ?? 'Không có dữ liệu', 'pass-error'));
     root.append(c);
@@ -258,6 +279,44 @@ function showMeta(video, hasTranscript) {
   if (video.id) { const img = el('img'); img.src = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`; img.alt = ''; img.onerror = () => img.remove(); thumb.append(img); }
 }
 
+// Bước thiết yếu (Summary, Fact-check) lỗi thì DỪNG và hỏi — không vội chấm điểm
+// khi còn thiếu dữ liệu. Bước phụ (Social, Gợi ý) lỗi thì bỏ qua, vẫn chấm bình thường.
+function askRetry(label, message) {
+  return new Promise(resolve => {
+    const box = $('#error');
+    box.replaceChildren();
+    box.hidden = false;
+    box.append(el('div', `Bước ${label} lỗi: ${message}`));
+    const row = el('div', null, 'retry-row');
+    const again = el('button', 'Thử lại bước này', 'go');
+    const skip = el('button', 'Bỏ qua, chấm điểm luôn', 'ghost-btn');
+    again.onclick = () => { box.hidden = true; resolve('retry'); };
+    skip.onclick = () => { box.hidden = true; resolve('skip'); };
+    row.append(again, skip);
+    box.append(row);
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+// Chạy một bước thiết yếu, cho phép thử lại không giới hạn cho tới khi được
+// hoặc người dùng chủ động bỏ qua.
+async function runEssential(step, payload, label, note) {
+  for (;;) {
+    stepStart(step, note);
+    try {
+      const data = await callStep(step, payload);
+      stepEnd(step, true);
+      return { data, skipped: false };
+    } catch (err) {
+      stepEnd(step, false);
+      const choice = await askRetry(label, err.message);
+      if (choice === 'skip') return { data: null, error: err.message, skipped: true };
+      progressBase -= WEIGHTS[step];          // trả lại % đã cộng để thanh không nhảy sai
+      setStage(step, '');
+    }
+  }
+}
+
 async function runScreen(transcriptOverride) {
   $('#go').disabled = true;
   $('#error').hidden = true;
@@ -294,39 +353,39 @@ async function runScreen(transcriptOverride) {
       return;
     }
 
-    // 2. Content (nặng nhất)
-    stepStart('content', 'đọc transcript, dựng tóm tắt…');
-    try {
-      report.content = await callStep('content', {
-        title: ing.video.title, channel: ing.video.channel, transcriptText, question
-      });
-      stepEnd('content', true);
-    } catch (err) { report.errors.content = err.message; stepEnd('content', false); }
-
-    // 3. Song song: factcheck + social + recommend (mỗi cái một request riêng)
-    const jobs = [];
-    if (report.content) {
-      stepStart('factcheck', 'đối chiếu nguồn ngoài…');
-      jobs.push(callStep('factcheck', { content: report.content })
-        .then(d => { report.factcheck = d; stepEnd('factcheck', true); })
-        .catch(err => { report.errors.factcheck = err.message; stepEnd('factcheck', false); }));
-      stepStart('recommend', 'tìm video cùng chủ đề…');
-      jobs.push(callStep('recommend', { title: ing.video.title, theme: report.content.summary?.theme ?? ing.video.title })
-        .then(d => { report.recommend = d; stepEnd('recommend', true); })
-        .catch(err => { report.errors.recommend = err.message; stepEnd('recommend', false); }));
-    } else {
-      stepEnd('factcheck', false); stepEnd('recommend', false);
+    // 2. Content — thiết yếu
+    {
+      const r0 = await runEssential('content',
+        { title: ing.video.title, channel: ing.video.channel, transcriptText, question },
+        'Summary', 'đọc transcript, dựng tóm tắt…');
+      report.content = r0.data;
+      if (r0.error) report.errors.content = r0.error;
     }
-    stepStart('social', 'đọc tín hiệu cộng đồng…');
-    jobs.push(callStep('social', {
-      title: ing.video.title, channel: ing.video.channel,
-      viewCount: ing.video.viewCount, comments: ing.comments
-    })
+
+    // 3. Bước phụ chạy nền song song (lỗi thì bỏ qua, không chặn chấm điểm)
+    const optional = [];
+    stepStart('social', 'đọc comment…');
+    optional.push(callStep('social', { comments: ing.comments })
       .then(d => { report.social = d; stepEnd('social', true); })
       .catch(err => { report.errors.social = err.message; stepEnd('social', false); }));
-    await Promise.allSettled(jobs);
+    if (report.content) {
+      stepStart('recommend', 'tìm video cùng chủ đề…');
+      optional.push(callStep('recommend', { title: ing.video.title, theme: report.content.summary?.theme ?? ing.video.title })
+        .then(d => { report.recommend = d; stepEnd('recommend', true); })
+        .catch(err => { report.errors.recommend = err.message; stepEnd('recommend', false); }));
+    } else stepEnd('recommend', false);
 
-    // 4. Compose
+    // 4. Fact-check — thiết yếu, có thể thử lại
+    if (report.content) {
+      const r1 = await runEssential('factcheck', { content: report.content },
+        'Fact-check', 'đối chiếu nguồn ngoài…');
+      report.factcheck = r1.data;
+      if (r1.error) report.errors.factcheck = r1.error;
+    } else stepEnd('factcheck', false);
+
+    await Promise.allSettled(optional);
+
+    // 5. Compose
     stepStart('compose', 'chấm điểm…');
     try {
       report.score = await callStep('compose', {
@@ -349,7 +408,7 @@ async function runScreen(transcriptOverride) {
   $('#go').disabled = false;
 }
 
-function showError(msg) { $('#go').disabled = false; const b = $('#error'); b.textContent = msg; b.hidden = false; }
+function showError(msg) { $('#go').disabled = false; const b = $('#error'); b.replaceChildren(); b.textContent = msg; b.hidden = false; }
 
 // ---------- wire ----------
 $('#form').addEventListener('submit', (e) => { e.preventDefault(); runScreen(); });

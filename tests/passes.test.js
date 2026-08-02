@@ -8,7 +8,7 @@ import { buildCompose, parseCompose, FALLBACK_SCORE } from '../server/passes/com
 
 const CONTENT_GOOD = {
   author: 'a',
-  summary: { theme: 't', highlights: 'h', conclusion: 'c', takeaway: 'k' },
+  summary: { theme: 't', highlights: ['h'], conclusion: 'c', takeaway: 'k' },
   outline: [{ timestamp: '0:45', point: 'p' }],
   stance: ['s'],
   facts: ['f'],
@@ -63,11 +63,11 @@ describe('factcheck pass', () => {
 
 describe('social pass', () => {
   it('build includes comments', () => {
-    const req = buildSocial({ title: 'T', channel: 'C', viewCount: 9, comments: [{ text: 'bình luận sâu', likes: 3 }], language: 'Tiếng Việt' });
+    const req = buildSocial({ comments: [{ text: 'bình luận sâu', likes: 3 }], language: 'Tiếng Việt' });
     expect(JSON.stringify(req.messages)).toContain('bình luận sâu');
   });
   it('parse validates shape', () => {
-    const good = { commentQuality: 'a', audienceProfile: 'b', buzz: 'c', dataGaps: [] };
+    const good = { sentiment: { label: 'Trái chiều', why: 'w' }, notable: ['n'], dataGaps: [] };
     expect(parseSocial(JSON.stringify(good))).toEqual(good);
     expect(() => parseSocial('{}')).toThrow();
   });

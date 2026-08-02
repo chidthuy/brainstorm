@@ -18,15 +18,31 @@ function getClient() {
   return client;
 }
 
+// Khi có web search, Claude chạy vòng lặp tra cứu phía server và có thể dừng
+// giữa chừng với stop_reason "pause_turn" — lúc đó câu trả lời CHƯA hoàn chỉnh
+// (chưa có JSON). Phải gửi tiếp để nó chạy nốt, không thì pass lỗi.
 export async function callClaude({ system, messages, tools, maxTokens = 4000, model }) {
-  const resp = await getClient().messages.create({
-    model: model || MODEL,
-    max_tokens: maxTokens,
-    system,
-    messages,
-    ...(tools ? { tools } : {})
-  });
-  return resp.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+  const client = getClient();
+  let msgs = messages;
+  let text = '';
+  for (let i = 0; i < 6; i++) {
+    const resp = await client.messages.create({
+      model: model || MODEL,
+      max_tokens: maxTokens,
+      system,
+      messages: msgs,
+      ...(tools ? { tools } : {})
+    });
+    text = resp.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+    if (resp.stop_reason !== 'pause_turn') {
+      if (resp.stop_reason === 'max_tokens' && !text.trimEnd().endsWith('}')) {
+        throw new Error('Output bị cắt giữa chừng (max_tokens) — thử lại hoặc chọn model khác');
+      }
+      return text;
+    }
+    msgs = [...msgs, { role: 'assistant', content: resp.content }];
+  }
+  return text;
 }
 
 export function extractJson(text) {

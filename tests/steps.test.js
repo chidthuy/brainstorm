@@ -6,12 +6,12 @@ import { parseIsoDuration } from '../server/ingest.js';
 
 const CONTENT = {
   author: 'a',
-  summary: { theme: 't', highlights: 'h', conclusion: 'c', takeaway: 'k' },
+  summary: { theme: 't', highlights: ['h1', 'h2'], conclusion: 'c', takeaway: 'k' },
   outline: [{ timestamp: '0:45', point: 'p' }],
   stance: ['s'], facts: ['f1'], focusAnswer: null
 };
 const FACTCHECK = { claims: [{ claim: 'f1', verdict: 'solid', note: '', sources: [] }] };
-const SOCIAL = { commentQuality: 'a', audienceProfile: 'b', buzz: 'c', dataGaps: [] };
+const SOCIAL = { sentiment: { label: 'Tích cực', why: 'nhiều khen ngợi' }, notable: ['một phản biện'], dataGaps: [] };
 const RECOMMEND = { items: [{ title: 'x', channel: 'c', url: 'http://x', why: 'w' }] };
 const SCORE = { score: 82, label: 'Đáng nghe trọn', reasons: ['r'], focusAnswer: 'đáp' };
 
@@ -72,11 +72,18 @@ describe('runStep', () => {
     expect(data).toEqual(FACTCHECK);
   });
 
-  it('social step tolerates empty comments', async () => {
+  it('social step tolerates empty comments and uses no web search', async () => {
     const cc = fakeClaude(SOCIAL);
-    const data = await runStep('social', { title: 'T', channel: 'C', viewCount: 0, comments: [] }, {}, { callClaude: cc });
+    const data = await runStep('social', { comments: [] }, {}, { callClaude: cc });
     expect(data).toEqual(SOCIAL);
     expect(JSON.stringify(cc.calls[0].messages)).toContain('KHÔNG lấy được comment');
+    expect(cc.calls[0].tools).toBeUndefined();
+  });
+
+  it('social step falls back to "Không rõ" for an unexpected sentiment label', async () => {
+    const data = await runStep('social', { comments: [{ text: 'hay', likes: 1 }] }, {},
+      { callClaude: fakeClaude({ sentiment: { label: 'Rực rỡ', why: 'x' }, notable: [] }) });
+    expect(data.sentiment.label).toBe('Không rõ');
   });
 
   it('recommend and compose steps round-trip', async () => {

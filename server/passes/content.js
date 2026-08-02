@@ -23,8 +23,12 @@ export function buildContent({ title, channel, transcriptText, question, languag
       '- CẮT: cụm mở đầu rỗng nghĩa ("Video bàn về", "Trong video này", "Tác giả đề cập đến", "Bài nói xoay quanh"); ' +
       'lời rào đón ("có thể thấy rằng", "nhìn chung", "đáng chú ý là", "nhấn mạnh rằng", "được nêu là"); ' +
       'disclaimer ("cần kiểm chứng độc lập", "đây là quan điểm cá nhân"); tính từ cảm thán không mang thông tin.\n' +
-      '- KHÔNG LẶP: mỗi thông tin xuất hiện đúng một lần trong cả báo cáo. Con số đã nêu ở highlights thì ' +
-      'đừng nhắc lại ở conclusion; ý đã có ở outline thì đừng chép lại ở summary.\n' +
+      '- KHÔNG LẶP: mỗi thông tin xuất hiện đúng một lần. theme nêu video NÓI VỀ GÌ; conclusion nêu điều ' +
+      'RÚT RA ĐƯỢC — không diễn đạt lại theme bằng chữ khác.\n' +
+      '- CHỈ GIỮ CHI TIẾT LIÊN QUAN tới luận điểm. Bỏ chi tiết vụn không ảnh hưởng kết luận ' +
+      '(biệt danh, tên người phụ, chuyện bên lề) — trừ khi chính nó là dữ kiện quan trọng.\n' +
+      '- MỖI CÂU PHẢI TỰ ĐỨNG ĐƯỢC, đọc một lần là hiểu. Không dùng cấu trúc lơ lửng kiểu ' +
+      '"cùng với X mới nổi lên sau Y và Z: W". Viết rõ quan hệ: cái gì thay cái gì, theo thứ tự nào.\n' +
       '- Một ý một câu. Tránh chuỗi mệnh đề nối bằng dấu phẩy kéo dài.\n' +
       '- Thuật ngữ/viết tắt lạ (ARR, orchestration...) kèm giải thích ngắn trong ngoặc, chỉ lần đầu.\n' +
       'TRƯỚC KHI TRẢ VỀ: đọc lại từng câu, thử xoá từng cụm từ — xoá mà không mất thông tin thì xoá thật.\n\n' +
@@ -37,11 +41,13 @@ export function buildContent({ title, channel, transcriptText, question, languag
       'Trả về DUY NHẤT một JSON object đúng schema:\n' +
       '{\n' +
       '  "author": string,            // 1-2 câu: kênh/tác giả là ai, chuyên môn gì. Không disclaimer.\n' +
-      '  "summary": {                 // tóm tắt theo 4 gạch đầu dòng, mỗi trường 1-2 câu cụ thể, dễ hiểu\n' +
-      '    "theme": string,           // chủ đề chính\n' +
-      '    "highlights": string,      // điểm/khái niệm nổi bật, kèm số liệu/ví dụ cụ thể\n' +
-      '    "conclusion": string,      // kết luận / insight quan trọng của tác giả\n' +
-      '    "takeaway": string         // người xem sẽ rút ra được gì\n' +
+      '  "summary": {\n' +
+      '    "theme": string,           // video nói về gì — 1-2 câu\n' +
+      '    "highlights": [string],    // MẢNG 3-6 gạch đầu dòng, mỗi gạch MỘT ý trọn vẹn kèm số liệu/ví dụ.\n' +
+      '                               // Gom theo chủ đề (VD một gạch cho mảng chip, một gạch cho doanh thu),\n' +
+      '                               // không nhồi mọi con số vào một khối chữ dày đặc.\n' +
+      '    "conclusion": string,      // điều RÚT RA được từ nội dung — không lặp lại theme\n' +
+      '    "takeaway": string         // người xem áp dụng được gì\n' +
       '  },\n' +
       '  "outline": [{"timestamp": string, "point": string}],  // dàn ý theo mốc thời gian\n' +
       '  "stance": [string],          // quan điểm/dự đoán của tác giả. Viết THẲNG nội dung, KHÔNG mở đầu bằng "Tác giả cho rằng/tin rằng/dự đoán" — mục này đã là stance của tác giả\n' +
@@ -63,7 +69,7 @@ export function parseContent(text) {
   const o = extractJson(text);
   const s = o.summary;
   if (typeof o.author !== 'string' || !s || typeof s.theme !== 'string' ||
-      typeof s.highlights !== 'string' || typeof s.conclusion !== 'string' ||
+      !Array.isArray(s.highlights) || typeof s.conclusion !== 'string' ||
       typeof s.takeaway !== 'string' || !Array.isArray(o.outline) ||
       !Array.isArray(o.stance) || !Array.isArray(o.facts) ||
       !('focusAnswer' in o)) {

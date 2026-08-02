@@ -23,7 +23,8 @@ export function buildFactcheck({ content, language }) {
       content: 'Các thông tin cần soi:\n' +
         (content.facts.length ? content.facts.map((f, i) => `${i + 1}. ${f}`).join('\n') : '(không có)')
     }],
-    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 4 }]
+    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 4 }],
+    maxTokens: 8000
   };
 }
 

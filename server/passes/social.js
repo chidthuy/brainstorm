@@ -1,38 +1,36 @@
 import { extractJson } from '../claude.js';
 
-export function buildSocial({ title, channel, viewCount, comments, language }) {
-  const commentBlock = comments.length
+// Chỉ đọc comment — KHÔNG dùng web search (đó là thứ làm bước này chậm và hay
+// lỗi, mà kết quả "độ lan toả" hầu như không giúp gì cho quyết định xem hay không).
+const SENTIMENTS = ['Tích cực', 'Tiêu cực', 'Trái chiều', 'Không rõ'];
+
+export function buildSocial({ comments, language }) {
+  const block = comments.length
     ? comments.map(c => `[${c.likes} likes] ${c.text}`).join('\n')
-    : '(KHÔNG lấy được comment do giới hạn kỹ thuật phía server — video vẫn có thể có nhiều comment)';
-  const viewText = viewCount ? `${viewCount} views` : 'không rõ lượt xem (không lấy được)';
+    : '(KHÔNG lấy được comment do giới hạn kỹ thuật — không suy ra là video không ai quan tâm)';
   return {
     system:
-      'Bạn phân tích social signals quanh một video. Audience quality là proxy cho content quality. ' +
-      'Đánh giá: (1) chất lượng comment — sâu sắc hay cảm thán, (2) chân dung người comment — ' +
-      'practitioner thật hay khán giả đại trà, (3) độ lan toả — video/kênh được nhắc ở đâu, bối cảnh nào (dùng web search nếu cần).\n\n' +
-      'QUY TẮC QUAN TRỌNG: dữ liệu comment/lượt xem có thể KHÔNG lấy được vì lý do kỹ thuật (server bị YouTube giới hạn). ' +
-      'Thiếu dữ liệu KHÔNG có nghĩa video 0 view hay không ai quan tâm — TUYỆT ĐỐI không suy diễn tiêu cực từ việc thiếu. ' +
-      'Khi thiếu: ghi ngắn gọn vào dataGaps, và đánh giá dựa trên những gì tra được về kênh/chủ đề qua web search. ' +
-      'Không lặp lại ý "thiếu dữ liệu" trong nhiều trường.\n\n' +
-      'MẬT ĐỘ THÔNG TIN: viết thẳng kết luận kèm dẫn chứng cụ thể (trích ý một comment tiêu biểu, tên nguồn ' +
-      'đã nhắc tới video). KHÔNG kể lể quá trình tìm kiếm ("tìm trên web không thấy...", "đã tra cứu nhưng..."), ' +
-      'không rào đón, không lặp ý giữa các trường. Giữ mọi dữ kiện, bỏ chữ rỗng.\n\n' +
-      'Trả về DUY NHẤT một JSON object: {"commentQuality": string, "audienceProfile": string, ' +
-      '"buzz": string, "dataGaps": [string]}. ' +
-      `Viết bằng ${language}.`,
-    messages: [{
-      role: 'user',
-      content: `Video: "${title}" — kênh ${channel} — ${viewText}\n\nTop comments:\n${commentBlock}`
-    }],
-    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 3 }]
+      'Bạn đọc comment của một video và rút ra 2 thứ, đúng 2 thứ:\n' +
+      '1. "sentiment": thái độ chung của người xem — chọn ĐÚNG một trong: ' +
+      '"Tích cực" | "Tiêu cực" | "Trái chiều" | "Không rõ", kèm 1 câu ngắn nêu căn cứ.\n' +
+      '2. "notable": các phản hồi ĐÁNG KỂ — phản biện có lý lẽ, bổ sung thông tin, sửa lỗi tác giả, ' +
+      'hoặc trải nghiệm thực tế cụ thể. BỎ QUA lời cảm thán ("hay quá", "cảm ơn anh"), lời khen suông, ' +
+      'lời xin xỏ. Nếu không có phản hồi nào đáng kể thì để mảng rỗng — đừng cố bịa ra.\n\n' +
+      'Trả về DUY NHẤT một JSON object: ' +
+      '{"sentiment": {"label": string, "why": string}, "notable": [string], "dataGaps": [string]}. ' +
+      `Mỗi mục notable một câu, trích ý chính (có thể trích nguyên văn ngắn trong ngoặc kép). Viết bằng ${language}.`,
+    messages: [{ role: 'user', content: `Comments:\n${block}` }],
+    maxTokens: 3000
   };
 }
 
 export function parseSocial(text) {
   const o = extractJson(text);
-  if (typeof o.commentQuality !== 'string' || typeof o.audienceProfile !== 'string' ||
-      typeof o.buzz !== 'string' || !Array.isArray(o.dataGaps)) {
+  const s = o.sentiment;
+  if (!s || typeof s.label !== 'string' || typeof s.why !== 'string' ||
+      !Array.isArray(o.notable)) {
     throw new Error('Social pass: output sai schema');
   }
-  return o;
+  if (!SENTIMENTS.includes(s.label)) s.label = 'Không rõ';
+  return { sentiment: s, notable: o.notable, dataGaps: Array.isArray(o.dataGaps) ? o.dataGaps : [] };
 }

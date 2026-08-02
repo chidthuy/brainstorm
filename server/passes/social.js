@@ -14,8 +14,9 @@ export function buildSocial({ title, channel, viewCount, comments, language }) {
       'Thiếu dữ liệu KHÔNG có nghĩa video 0 view hay không ai quan tâm — TUYỆT ĐỐI không suy diễn tiêu cực từ việc thiếu. ' +
       'Khi thiếu: ghi ngắn gọn vào dataGaps, và đánh giá dựa trên những gì tra được về kênh/chủ đề qua web search. ' +
       'Không lặp lại ý "thiếu dữ liệu" trong nhiều trường.\n\n' +
-      'NGẮN GỌN: mỗi trường commentQuality/audienceProfile/buzz tối đa 35 từ, mỗi dataGaps tối đa 15 từ ' +
-      'và nhiều nhất 3 mục. Vào thẳng kết luận, không kể lể quá trình tìm kiếm.\n\n' +
+      'MẬT ĐỘ THÔNG TIN: viết thẳng kết luận kèm dẫn chứng cụ thể (trích ý một comment tiêu biểu, tên nguồn ' +
+      'đã nhắc tới video). KHÔNG kể lể quá trình tìm kiếm ("tìm trên web không thấy...", "đã tra cứu nhưng..."), ' +
+      'không rào đón, không lặp ý giữa các trường. Giữ mọi dữ kiện, bỏ chữ rỗng.\n\n' +
       'Trả về DUY NHẤT một JSON object: {"commentQuality": string, "audienceProfile": string, ' +
       '"buzz": string, "dataGaps": [string]}. ' +
       `Viết bằng ${language}.`,

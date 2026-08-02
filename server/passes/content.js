@@ -16,23 +16,24 @@ export function buildContent({ title, channel, transcriptText, question, languag
       'tâm lý, triết học và hành vi con người; đọc để hiểu thực tại, nuôi tự do tư duy và liên tục tinh chỉnh ' +
       'thế giới quan của riêng mình. Viết bản đọc cho đúng người này. ' +
       'Bản đọc của bạn PHẢI hữu ích hơn phần mô tả tác giả tự viết. Chỉ dựa trên transcript, không bịa.\n\n' +
-      'PHONG CÁCH VIẾT — ƯU TIÊN SỐ 1 LÀ NGẮN GỌN:\n' +
-      'Viết như nhắn tin cho người đang bận. Mỗi câu tối đa 20 từ. Câu nào bỏ đi mà ý không đổi thì bỏ.\n' +
-      'GIỚI HẠN CỨNG (đếm từ, không được vượt):\n' +
-      '- author: tối đa 25 từ.  - theme: tối đa 25 từ.\n' +
-      '- highlights: tối đa 45 từ — chỉ 2-3 điểm ĐẮT nhất, bỏ phần còn lại.\n' +
-      '- conclusion: tối đa 30 từ.  - takeaway: tối đa 30 từ.\n' +
-      '- mỗi outline point: tối đa 20 từ.  - mỗi stance: tối đa 20 từ.\n\n' +
-      'CẤM các cụm thừa: "Video bàn về", "Trong video này", "Tác giả đề cập đến", "Điều này cho thấy", ' +
-      '"đáng chú ý là", "nhìn chung", "có thể thấy rằng", "được nêu là", "nhấn mạnh rằng", ' +
-      '"cần kiểm chứng độc lập", "đây là quan điểm cá nhân". Vào thẳng nội dung.\n' +
-      'Thuật ngữ/viết tắt lạ (ARR, orchestration...) kèm giải thích 2-4 từ trong ngoặc, lần đầu thôi.\n\n' +
-      'VÍ DỤ:\n' +
-      'DỞ (dài dòng): "Video bàn về sự chuyển dịch từ người làm sang người điều phối AI (Orchestrator) ' +
-      'trong kỷ nguyên Agentic AI, cuộc đua hệ điều hành AI, và nút thắt hạ tầng mới: CPU đang hot trở lại ' +
-      'sau khi GPU và chip nhớ đã qua giai đoạn khan hiếm."\n' +
-      'TỐT (gọn): "Từ người làm sang người điều phối AI. Nút thắt hạ tầng dịch dần từ GPU sang chip nhớ, ' +
-      'rồi tới CPU."\n\n' +
+      'PHONG CÁCH VIẾT — MẬT ĐỘ THÔNG TIN CAO:\n' +
+      'Giữ TRỌN thông tin, cắt sạch chữ rỗng. Độ dài đi theo lượng dữ kiện thật: nhiều dữ kiện thì viết dài hơn, ' +
+      'ít thì ngắn. KHÔNG cắt cụt làm mất dữ kiện, cũng KHÔNG kéo dài cho đầy.\n' +
+      '- GIỮ BẰNG MỌI GIÁ: con số, tên riêng, mốc thời gian, ví dụ cụ thể, đơn vị. Đây là phần giá trị nhất.\n' +
+      '- CẮT: cụm mở đầu rỗng nghĩa ("Video bàn về", "Trong video này", "Tác giả đề cập đến", "Bài nói xoay quanh"); ' +
+      'lời rào đón ("có thể thấy rằng", "nhìn chung", "đáng chú ý là", "nhấn mạnh rằng", "được nêu là"); ' +
+      'disclaimer ("cần kiểm chứng độc lập", "đây là quan điểm cá nhân"); tính từ cảm thán không mang thông tin.\n' +
+      '- KHÔNG LẶP: mỗi thông tin xuất hiện đúng một lần trong cả báo cáo. Con số đã nêu ở highlights thì ' +
+      'đừng nhắc lại ở conclusion; ý đã có ở outline thì đừng chép lại ở summary.\n' +
+      '- Một ý một câu. Tránh chuỗi mệnh đề nối bằng dấu phẩy kéo dài.\n' +
+      '- Thuật ngữ/viết tắt lạ (ARR, orchestration...) kèm giải thích ngắn trong ngoặc, chỉ lần đầu.\n' +
+      'TRƯỚC KHI TRẢ VỀ: đọc lại từng câu, thử xoá từng cụm từ — xoá mà không mất thông tin thì xoá thật.\n\n' +
+      'VÍ DỤ (giữ nguyên mọi dữ kiện, chỉ bỏ chữ thừa):\n' +
+      'DỞ: "Video bàn về sự chuyển dịch từ người làm sang người điều phối AI (Orchestrator) trong kỷ nguyên ' +
+      'Agentic AI, cuộc đua hệ điều hành AI (Open Claw vs Claude/Anthropic), và nút thắt hạ tầng mới: CPU đang ' +
+      'hot trở lại sau khi GPU và chip nhớ (Memory) đã qua giai đoạn khan hiếm."\n' +
+      'TỐT: "Chuyển từ người làm sang người điều phối AI (orchestrator). Cuộc đua hệ điều hành AI: Open Claw ' +
+      'vs Claude. Nút thắt hạ tầng đi từ GPU sang chip nhớ, nay tới CPU."\n\n' +
       'Trả về DUY NHẤT một JSON object đúng schema:\n' +
       '{\n' +
       '  "author": string,            // 1-2 câu: kênh/tác giả là ai, chuyên môn gì. Không disclaimer.\n' +

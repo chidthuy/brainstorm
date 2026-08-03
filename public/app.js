@@ -134,23 +134,7 @@ function renderReport(r) {
   {
     const { card: c, body } = card('Social signals');
     if (r.social) {
-      const s = r.social.sentiment ?? {};
-      const SENT = { 'Tích cực': 'hi', 'Tiêu cực': 'lo', 'Trái chiều': 'mid' };
-      const row = el('div', null, 'social-row');
-      row.append(el('span', 'Sentiment', 'k'));
-      const val = el('span');
-      val.append(el('b', s.label ?? 'Không rõ', SENT[s.label] ?? ''));
-      if (s.why) val.append(document.createTextNode(' — ' + s.why));
-      row.append(val); body.append(row);
-
-      const nrow = el('div', null, 'social-row');
-      nrow.append(el('span', 'Phản hồi đáng kể', 'k'));
-      if (r.social.notable?.length) {
-        const ul = el('ul', null, 'stance');
-        for (const n of r.social.notable) ul.append(el('li', n));
-        nrow.append(ul);
-      } else nrow.append(el('span', 'Không có phản hồi nào đáng kể — chủ yếu là cảm thán.'));
-      body.append(nrow);
+      body.append(el('p', r.social.readout || 'Không có ghi nhận nào đáng kể.'));
       if (r.social.dataGaps?.length) body.append(el('p', 'Thiếu dữ liệu: ' + r.social.dataGaps.join('; '), 'pass-error'));
     } else body.append(el('p', r.errors.social ?? 'Không có dữ liệu', 'pass-error'));
     root.append(c);

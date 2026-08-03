@@ -16,10 +16,21 @@ export function buildCompose({ content, factcheck, social, video, question, lang
   return {
     system:
       'Bạn chấm điểm screening 0-100 cho một video dài: "có đáng bỏ thời gian nghe trọn không". ' +
-      'Cân nhắc: nội dung dày/mỏng, lập luận chặt/lỏng, độ tin cậy của các fact (nhiều fact yếu/sai thì trừ mạnh), ' +
-      'và chất lượng audience. Điểm cao = rất đáng nghe; thấp = nên bỏ qua.\n\n' +
+      'Chấm theo GIÁ TRỊ THÔNG TIN cho người xem, KHÔNG phải theo mức độ hoàn hảo học thuật.\n\n' +
+      'THANG ĐIỂM (mặc định là điểm khá — chỉ hạ thấp khi có lý do thực sự):\n' +
+      '- 80-100: nội dung dày, nhiều insight/dữ kiện có giá trị, lập luận vững — rất đáng nghe trọn.\n' +
+      '- 65-79: nội dung tốt, đáng nghe; có vài chỗ dàn trải hoặc claim chưa chắc nhưng không làm hỏng giá trị.\n' +
+      '- 50-64: có giá trị vừa phải — nghe lướt/tua phần hay là đủ.\n' +
+      '- 30-49: loãng, ít thông tin mới, hoặc nhiều fact sai lệch đáng kể.\n' +
+      '- 0-29: sai sự thật nghiêm trọng, câu view rỗng tuếch, gần như vô giá trị.\n' +
+      'ĐIỂM XUẤT PHÁT: một video có nội dung chuyên môn thật, mạch lạc, nhiều dữ kiện cụ thể MẶC ĐỊNH nằm ở vùng 70-85. ' +
+      'Chỉ kéo xuống khi có bằng chứng rõ: fact bị fact-check đánh false/misleading (trừ mạnh), nội dung rỗng, lặp, hoặc lạc đề. ' +
+      'ĐỪNG trừ điểm chỉ vì một vài claim ở mức "weak/chưa kiểm chứng được" — đó là chuyện bình thường của mọi video. ' +
+      'Một video hay bị chấm 35-62 là SAI; hãy tự hỏi "nếu bỏ 1-2 giờ nghe, người xem có thu được gì đáng giá không" — ' +
+      'nếu có thì điểm phải phản ánh đúng điều đó.\n\n' +
       'QUY TẮC: nếu dữ liệu social (comment/lượt xem) bị thiếu do lỗi kỹ thuật (xem dataGaps), ' +
-      'BỎ QUA tiêu chí đó — không trừ điểm, không nêu "thiếu dữ liệu social" làm lý do.\n' +
+      'BỎ QUA tiêu chí đó — không trừ điểm, không nêu "thiếu dữ liệu social" làm lý do. ' +
+      'Comment ít/vô thưởng vô phạt cũng KHÔNG phải lý do trừ điểm nội dung.\n' +
       'MẬT ĐỘ THÔNG TIN: mỗi reason vào thẳng lý do kèm dẫn chứng cụ thể, không mở đầu bằng "Video này", ' +
       '"Có thể thấy", "Đáng chú ý là"; không lặp lại ý đã có trong tóm tắt. Giữ dữ kiện, bỏ chữ rỗng.\n\n' +
       'Trả về DUY NHẤT một JSON object: {"score": number (0-100), "label": string (nhãn ngắn: VD "Đáng nghe trọn", "Nghe lướt", "Bỏ qua"), ' +

@@ -11,7 +11,7 @@ const CONTENT = {
   stance: ['s'], facts: ['f1'], focusAnswer: null
 };
 const FACTCHECK = { claims: [{ claim: 'f1', verdict: 'solid', note: '', sources: [] }] };
-const SOCIAL = { sentiment: { label: 'Tích cực', why: 'nhiều khen ngợi' }, notable: ['một phản biện'], dataGaps: [] };
+const SOCIAL = { readout: 'Một phản biện đáng chú ý về số liệu.', dataGaps: [] };
 const RECOMMEND = { items: [{ title: 'x', channel: 'c', url: 'http://x', why: 'w' }] };
 const SCORE = { score: 82, label: 'Đáng nghe trọn', reasons: ['r'], focusAnswer: 'đáp' };
 
@@ -80,10 +80,10 @@ describe('runStep', () => {
     expect(cc.calls[0].tools).toBeUndefined();
   });
 
-  it('social step falls back to "Không rõ" for an unexpected sentiment label', async () => {
+  it('social step falls back to NO_SIGNAL for an empty readout', async () => {
     const data = await runStep('social', { comments: [{ text: 'hay', likes: 1 }] }, {},
-      { callClaude: fakeClaude({ sentiment: { label: 'Rực rỡ', why: 'x' }, notable: [] }) });
-    expect(data.sentiment.label).toBe('Không rõ');
+      { callClaude: fakeClaude({ readout: '' }) });
+    expect(data.readout).toBe('Không có ghi nhận nào đáng kể.');
   });
 
   it('recommend and compose steps round-trip', async () => {

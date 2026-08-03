@@ -16,6 +16,12 @@ export function buildContent({ title, channel, transcriptText, question, languag
       'tâm lý, triết học và hành vi con người; đọc để hiểu thực tại, nuôi tự do tư duy và liên tục tinh chỉnh ' +
       'thế giới quan của riêng mình. Viết bản đọc cho đúng người này. ' +
       'Bản đọc của bạn PHẢI hữu ích hơn phần mô tả tác giả tự viết. Chỉ dựa trên transcript, không bịa.\n\n' +
+      'DANH TÍNH TÁC GIẢ — TUYỆT ĐỐI KHÔNG BỊA:\n' +
+      'Chỉ nêu tên/chức danh/tổ chức của tác giả nếu chính transcript hoặc tiêu đề/kênh NÓI RÕ. ' +
+      'KHÔNG suy ra danh tính từ kiến thức nền của bạn, KHÔNG đoán tên người nói, KHÔNG thêm tiểu sử ' +
+      '(công ty đã sáng lập, học vấn, thành tựu...) mà transcript không hề nhắc. Đoán sai tên là lỗi nặng nhất. ' +
+      'Nếu transcript không cho biết rõ người nói là ai, ghi đúng những gì biết được (VD "diễn giả trong hội thảo X", ' +
+      '"kênh Y") thay vì bịa một cái tên. Chỉ giữ thông tin tác giả LIÊN QUAN tới độ tin cậy của nội dung.\n\n' +
       'PHONG CÁCH VIẾT — MẬT ĐỘ THÔNG TIN CAO:\n' +
       'Giữ TRỌN thông tin, cắt sạch chữ rỗng. Độ dài đi theo lượng dữ kiện thật: nhiều dữ kiện thì viết dài hơn, ' +
       'ít thì ngắn. KHÔNG cắt cụt làm mất dữ kiện, cũng KHÔNG kéo dài cho đầy.\n' +
@@ -40,12 +46,15 @@ export function buildContent({ title, channel, transcriptText, question, languag
       'vs Claude. Nút thắt hạ tầng đi từ GPU sang chip nhớ, nay tới CPU."\n\n' +
       'Trả về DUY NHẤT một JSON object đúng schema:\n' +
       '{\n' +
-      '  "author": string,            // 1-2 câu: kênh/tác giả là ai, chuyên môn gì. Không disclaimer.\n' +
+      '  "author": string,            // 1 câu, CHỈ từ dữ kiện trong transcript/tiêu đề/kênh — không đoán tên, không thêm tiểu sử tự bịa\n' +
       '  "summary": {\n' +
       '    "theme": string,           // video nói về gì — 1-2 câu\n' +
-      '    "highlights": [string],    // MẢNG 3-6 gạch đầu dòng, mỗi gạch MỘT ý trọn vẹn kèm số liệu/ví dụ.\n' +
-      '                               // Gom theo chủ đề (VD một gạch cho mảng chip, một gạch cho doanh thu),\n' +
-      '                               // không nhồi mọi con số vào một khối chữ dày đặc.\n' +
+      '    "highlights": [string],    // MẢNG 2-5 gạch đầu dòng — CHỈ các ý CỐT LÕI làm nên giá trị video.\n' +
+      '                               // Chọn lọc gắt: mỗi highlight phải là một luận điểm/insight trung tâm,\n' +
+      '                               // KHÔNG phải mọi ví dụ hay case study đều đáng lên highlight (một ca minh hoạ\n' +
+      '                               // cho luận điểm đã có thì gộp vào luận điểm đó hoặc bỏ). Nếu phân vân "cái này\n' +
+      '                               // có phải điểm chính không" thì gần như chắc là không — để nó cho outline.\n' +
+      '                               // Gom theo chủ đề, mỗi gạch một ý trọn vẹn kèm số liệu/ví dụ nếu là cốt lõi.\n' +
       '    "conclusion": string,      // điều RÚT RA được từ nội dung — không lặp lại theme\n' +
       '    "takeaway": string         // người xem áp dụng được gì\n' +
       '  },\n' +

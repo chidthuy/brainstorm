@@ -66,10 +66,13 @@ describe('social pass', () => {
     const req = buildSocial({ comments: [{ text: 'bình luận sâu', likes: 3 }], language: 'Tiếng Việt' });
     expect(JSON.stringify(req.messages)).toContain('bình luận sâu');
   });
-  it('parse validates shape', () => {
-    const good = { sentiment: { label: 'Trái chiều', why: 'w' }, notable: ['n'], dataGaps: [] };
+  it('parse validates shape and returns a single readout', () => {
+    const good = { readout: 'Vài người trong ngành phản đối luận điểm chính.', dataGaps: [] };
     expect(parseSocial(JSON.stringify(good))).toEqual(good);
     expect(() => parseSocial('{}')).toThrow();
+  });
+  it('parse falls back to NO_SIGNAL for an empty readout', () => {
+    expect(parseSocial(JSON.stringify({ readout: '   ' })).readout).toBe('Không có ghi nhận nào đáng kể.');
   });
 });
 

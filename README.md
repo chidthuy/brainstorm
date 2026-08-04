@@ -108,6 +108,12 @@ Spec: `docs/superpowers/specs/2026-07-19-video-screening-assistant-design.md`
 npm test
 ```
 
+Kiểm tra `GEMINI_API_KEY` dùng được chưa (một lần gọi thật, chỉ nghe 2 phút đầu):
+
+```bash
+npm run check-gemini -- "https://www.youtube.com/watch?v=XXXXXXXXXXX"
+```
+
 E2E thủ công, hai lượt:
 
 1. **Video có captions** (một talk 1h+): kiểm tra đủ các khối — verdict card kèm

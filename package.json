@@ -5,7 +5,8 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "start": "node server/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check-gemini": "node scripts/check-gemini.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

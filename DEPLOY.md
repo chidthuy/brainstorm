@@ -45,6 +45,15 @@ Trước khi bấm Deploy, mở mục **Environment Variables** và thêm:
 2. Bấm **Create API key** → chọn project (hoặc để nó tự tạo) → copy key.
 3. Dán vào Vercel làm biến `GEMINI_API_KEY`.
 
+Muốn biết key chạy được chưa mà không phải đợi gặp video hỏng, chạy trên máy:
+
+```bash
+npm run check-gemini -- "https://www.youtube.com/watch?v=XXXXXXXXXXX"
+```
+
+Nó nghe thử 2 phút đầu (gần như không tốn hạn mức) rồi in ra vài dòng
+transcript thật.
+
 Khi YouTube chặn máy chủ lấy phụ đề, app đưa thẳng link video cho Gemini nghe
 lại — Gemini là của Google nên đọc được YouTube mà không đi qua IP máy chủ.
 Bản miễn phí cho **8 giờ video/ngày** và chỉ đọc được **video công khai**.

@@ -112,6 +112,16 @@ describe('transcribeWindow', () => {
     expect(out.text).toBe('[0:01] a');
   });
 
+  it('does not waste a second call when the key itself is rejected', async () => {
+    const f = fakeFetch(
+      { error: { message: 'API key not valid. Please pass a valid API key.' } },
+      { ok: false, status: 400 }
+    );
+    await expect(transcribeWindow({ videoId: 'abcdefghijk', fetchImpl: f, apiKey: 'bad' }))
+      .rejects.toThrow('API key not valid');
+    expect(f.calls.length).toBe(1);
+  });
+
   it('surfaces non-400 errors instead of silently retrying', async () => {
     const f = fakeFetch({ error: { message: 'RESOURCE_EXHAUSTED' } }, { ok: false, status: 429 });
     await expect(transcribeWindow({ videoId: 'abcdefghijk', fetchImpl: f, apiKey: 'k' }))

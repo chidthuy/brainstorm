@@ -154,6 +154,14 @@ async function callGemini(body, model, apiKey, fetchImpl) {
   return data;
 }
 
+// Các tham số tinh chỉnh (mediaResolution, thinkingConfig) đổi tên theo đời
+// model. API từ chối vì tên field thì gọi lại được; từ chối vì key/quyền thì không.
+const CONFIG_REJECTION = /unknown name|invalid json payload|unknown field|not supported|cannot find field|invalid value at .*generationconfig|thinking|mediaresolution/i;
+
+export function isConfigRejection(err) {
+  return err?.status === 400 && CONFIG_REJECTION.test(String(err.message ?? ''));
+}
+
 function textOf(data) {
   const parts = data?.candidates?.[0]?.content?.parts ?? [];
   return parts.filter(p => typeof p.text === 'string').map(p => p.text).join('\n').trim();
@@ -173,9 +181,10 @@ export async function transcribeWindow({
   try {
     data = await callGemini(buildBody({ videoUrl, startSec, endSec, minimal: false }), model, apiKey, fetchImpl);
   } catch (err) {
-    // 400 thường là do một tham số generationConfig không có ở đời model này —
-    // thử lại bằng cấu hình tối thiểu trước khi bỏ cuộc.
-    if (err.status !== 400) throw err;
+    // Chỉ thử lại khi API chê một THAM SỐ cấu hình (tên field khác nhau giữa các
+    // đời model). Key sai / video riêng tư cũng trả 400 nhưng gọi lại chỉ tốn
+    // thêm một lượt mà chắc chắn hỏng tiếp.
+    if (!isConfigRejection(err)) throw err;
     data = await callGemini(buildBody({ videoUrl, startSec, endSec, minimal: true }), model, apiKey, fetchImpl);
   }
 

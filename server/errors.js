@@ -10,6 +10,16 @@ const RULES = [
     'Bị giới hạn tốc độ gọi API. Chờ khoảng một phút rồi soi lại.'],
   [/overloaded/i,
     'Máy chủ Claude đang quá tải. Thử lại sau ít phút.'],
+  [/Chưa cấu hình GEMINI_API_KEY/i,
+    'Chưa có GEMINI_API_KEY nên không nhờ Gemini nghe video được. Thêm biến này trên Vercel ' +
+    '(Settings → Environment Variables) rồi Redeploy — hoặc dán transcript thủ công bên dưới.'],
+  [/API key not valid|API_KEY_INVALID/i,
+    'GEMINI_API_KEY không hợp lệ. Tạo key mới ở aistudio.google.com/apikey rồi cập nhật trên Vercel.'],
+  [/RESOURCE_EXHAUSTED|Gemini API lỗi 429/i,
+    'Gemini đã hết hạn mức hôm nay (bản miễn phí giới hạn 8 giờ video/ngày). Chờ sang ngày mới, ' +
+    'bật thanh toán cho project Google, hoặc dán transcript thủ công.'],
+  [/Gemini API lỗi 4\d\d/i,
+    'Gemini không đọc được video này (thường do video ở chế độ riêng tư/không công khai). Dán transcript thủ công bên dưới.'],
   [/quotaExceeded|YouTube Data API lỗi 403/i,
     'Hết quota YouTube Data API hôm nay (10.000 lượt/ngày). Chờ sang ngày mới hoặc bỏ trống YOUTUBE_API_KEY.'],
   [/Video không tồn tại|bị ẩn/i,

@@ -33,6 +33,7 @@ Mở file `.env` bằng Notepad/TextEdit, điền:
 ANTHROPIC_API_KEY=sk-ant-...   ← key Claude của bạn (console.anthropic.com)
 APP_PASSWORD=                  ← để trống được (chạy local không cần mật khẩu)
 YOUTUBE_API_KEY=               ← tùy chọn, xem DEPLOY.md cách tạo
+GEMINI_API_KEY=                ← tùy chọn, nghe lại video khi không có phụ đề
 ```
 
 ## Mỗi lần dùng

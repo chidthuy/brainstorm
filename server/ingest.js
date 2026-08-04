@@ -57,10 +57,25 @@ async function fetchViaDataApi(id, key) {
   return {
     title: v.snippet?.title ?? '(không rõ tiêu đề)',
     channel: v.snippet?.channelTitle ?? '(không rõ kênh)',
+    description: capDescription(v.snippet?.description),
+    publishedAt: v.snippet?.publishedAt ?? null,
     viewCount: Number(v.statistics?.viewCount ?? 0),
+    commentCount: Number(v.statistics?.commentCount ?? 0),
     durationSec: parseIsoDuration(v.contentDetails?.duration),
     comments
   };
+}
+
+// Description do TÁC GIẢ tự viết — vừa là nguồn đối chiếu hữu ích, vừa là chỗ
+// dễ dẫn dắt/nhồi chỉ thị nhất. Cắt ngắn để không nuốt mất transcript trong
+// context và để một description dài bất thường không lấn át bản đọc.
+export const MAX_DESCRIPTION_CHARS = 4000;
+export function capDescription(text) {
+  const s = String(text ?? '').trim();
+  if (!s) return '';
+  return s.length <= MAX_DESCRIPTION_CHARS
+    ? s
+    : s.slice(0, MAX_DESCRIPTION_CHARS) + '\n[... phần mô tả còn lại đã cắt ...]';
 }
 
 let yt = null;
@@ -115,8 +130,13 @@ export async function fetchVideoData(url) {
         title: basic.title ?? info.primary_info?.title?.text ?? '(không rõ tiêu đề)',
         channel: basic.author ?? basic.channel?.name ??
           info.secondary_info?.owner?.author?.name ?? '(không rõ kênh)',
+        description: capDescription(
+          basic.short_description ?? info.secondary_info?.description?.text ?? ''
+        ),
+        publishedAt: info.primary_info?.published?.text ?? null,
         durationSec: Number(basic.duration ?? 0),
-        viewCount
+        viewCount,
+        commentCount: 0
       };
       try {
         const c = await tube.getComments(id, 'TOP_COMMENTS');
@@ -135,16 +155,21 @@ export async function fetchVideoData(url) {
   }
 
   const m = meta ?? ytMeta ?? {
-    title: '(không rõ tiêu đề)', channel: '(không rõ kênh)', durationSec: 0, viewCount: 0
+    title: '(không rõ tiêu đề)', channel: '(không rõ kênh)', description: '',
+    publishedAt: null, durationSec: 0, viewCount: 0, commentCount: 0
   };
+  const comments = meta ? meta.comments : ytComments;
   return {
     id,
     title: m.title,
     channel: m.channel,
+    description: m.description ?? '',
+    publishedAt: m.publishedAt ?? null,
     durationSec: m.durationSec,
     viewCount: m.viewCount,
+    commentCount: m.commentCount || comments.length,
     transcript,
     transcriptSource,
-    comments: meta ? meta.comments : ytComments
+    comments
   };
 }

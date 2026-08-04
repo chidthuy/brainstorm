@@ -35,9 +35,21 @@ Trước khi bấm Deploy, mở mục **Environment Variables** và thêm:
 | `ANTHROPIC_API_KEY` | dán key `sk-ant-...` của bạn | ✅ |
 | `APP_PASSWORD` | tự đặt một mật khẩu, ví dụ `caiphe2026` | ✅ |
 | `YOUTUBE_API_KEY` | key YouTube Data API (cách tạo bên dưới) | Nên có |
+| `GEMINI_API_KEY` | key Google AI Studio (cách tạo bên dưới) | Nên có |
 
 > `APP_PASSWORD` chính là mật khẩu để mở app sau này. Ai không biết nó thì
 > không dùng được, nên không đốt được tiền API của bạn.
+
+#### Tạo `GEMINI_API_KEY` (miễn phí, ~1 phút — cứu những video không có phụ đề)
+1. Vào https://aistudio.google.com/apikey → đăng nhập Google.
+2. Bấm **Create API key** → chọn project (hoặc để nó tự tạo) → copy key.
+3. Dán vào Vercel làm biến `GEMINI_API_KEY`.
+
+Khi YouTube chặn máy chủ lấy phụ đề, app đưa thẳng link video cho Gemini nghe
+lại — Gemini là của Google nên đọc được YouTube mà không đi qua IP máy chủ.
+Bản miễn phí cho **8 giờ video/ngày** và chỉ đọc được **video công khai**.
+Không có key này app vẫn chạy, chỉ là gặp video không phụ đề thì bạn phải dán
+transcript bằng tay.
 
 #### Tạo `YOUTUBE_API_KEY` (miễn phí, ~3 phút — giúp lấy comment/metadata ổn định)
 1. Vào https://console.cloud.google.com → đăng nhập Google → chấp nhận điều khoản.

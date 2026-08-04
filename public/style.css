@@ -120,6 +120,24 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .verdict .vtext li { margin: .18rem 0; font-size: .9rem; }
 .hi { color: var(--ok); } .mid { color: var(--warn); } .lo { color: var(--bad); }
 
+/* Bảng trục chấm điểm — xếp theo trọng số giảm dần, cho thấy điểm đến từ đâu. */
+.breakdown { margin-top: .55rem; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); overflow: hidden; }
+.bd-row { display: grid; grid-template-columns: 18px 150px 1fr; gap: .55rem; align-items: baseline;
+  padding: .45rem .8rem; font-size: .85rem; border-top: 1px solid var(--line); }
+.bd-row:first-child { border-top: 0; }
+.bd-mark { font-size: .7rem; text-align: center; }
+.bd-name { color: var(--text); }
+.bd-note { color: var(--muted); }
+.bd-plus .bd-mark { color: var(--ok); }
+.bd-minus .bd-mark { color: var(--bad); }
+.bd-neutral .bd-mark { color: var(--muted-2); }
+.bd-skip { opacity: .55; }
+.bd-skip .bd-mark { color: var(--muted-2); }
+@media (max-width: 620px) { .bd-row { grid-template-columns: 18px 1fr; } .bd-note { grid-column: 2; } }
+
+/* Cảnh báo tiêu đề/mô tả hứa một đằng, video nói một nẻo. */
+.desc-gap { color: var(--warn); font-size: .9rem; }
+
 .outline { display: flex; flex-direction: column; }
 .oitem { display: grid; grid-template-columns: 66px 1fr; gap: .7rem; padding: .55rem 0; border-top: 1px solid var(--line); align-items: start; }
 .oitem:first-child { border-top: 0; }
@@ -169,7 +187,13 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .howto summary { cursor: pointer; color: var(--accent); font-size: .84rem; list-style: none; }
 .howto summary::-webkit-details-marker { display: none; }
 .howto ol { margin: .5rem 0 0; padding-left: 1.2rem; font-size: .85rem; color: var(--muted); }
+.howto p { font-size: .85rem; }
 .fb-actions { display: flex; justify-content: flex-end; margin-top: .6rem; }
+/* Nút kéo lên thanh bookmark — nằm ngay trong trang, không mở tab mới. */
+.drag { display: inline-block; padding: .55rem 1.2rem; border-radius: 999px; background: var(--accent);
+  color: var(--accent-ink); font-weight: 750; font-size: .88rem; text-decoration: none; cursor: grab; }
+.hint { font-size: .78rem; color: var(--muted-2) !important; }
+kbd { font-family: var(--mono); font-size: .78rem; background: var(--elev); border: 1px solid var(--line); border-radius: 4px; padding: .1rem .35rem; }
 
 @media (max-width: 760px) {
   aside { display: none; }

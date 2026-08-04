@@ -59,23 +59,26 @@
       </form>
 
       <div class="fallback" id="fallback" hidden>
-        <div class="fb-title">⚠ Không lấy được phụ đề của video này</div>
-        <p>Đã thử 4 cách lấy phụ đề nhưng YouTube chặn máy chủ (IP trung tâm dữ liệu). Dán transcript vào đây để soi tiếp — hoặc chạy app trên máy bạn thì luôn lấy được (xem <code>RUN-LOCAL.md</code> trong repo).</p>
+        <div class="fb-title">⚠ Không lấy được lời thoại của video này</div>
+        <p id="fbNote"></p>
         <textarea id="txPaste" placeholder="Dán transcript / lời thoại vào đây…"></textarea>
-        <p style="margin:.2rem 0 .6rem"><a href="/lay-transcript.html" target="_blank" rel="noopener"><b>→ Lấy transcript bằng 1 cú bấm</b></a> (nút bookmark chạy trong trình duyệt bạn — luôn lấy được)</p>
-        <details class="howto">
-          <summary>Hoặc cách thủ công</summary>
-          <ol>
-            <li><b>YouTube:</b> dưới video bấm <b>“…” → “Show transcript”</b>, bôi đen toàn bộ khung, copy, dán vào ô trên (app tự nhận mốc thời gian).</li>
-            <li><b>Podcast / Spotify:</b> mở bản transcript của tập nếu có; hoặc dùng công cụ chuyển giọng nói → chữ rồi dán vào.</li>
-            <li>Không cần chuẩn từng chữ — có nội dung là tôi soi được.</li>
-          </ol>
-        </details>
         <div class="fb-actions"><button class="go" id="fbRun" type="button">Soi với transcript này</button></div>
+        <details class="howto">
+          <summary>Cách lấy transcript nhanh</summary>
+          <p><b>Cách 1 — một cú bấm.</b> Hiện thanh bookmark bằng <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>
+            (Mac: <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>), <b>kéo thả</b> nút dưới đây lên đó — chỉ làm một lần.
+            Sau đó mở video YouTube và bấm nút vừa lưu: transcript được copy sẵn, quay lại đây dán vào ô trên.</p>
+          <p><a class="drag" id="bm" href="#">📄 Lấy transcript</a></p>
+          <p class="hint">Bấm nút ngay tại đây thì không có tác dụng — phải kéo lên thanh bookmark rồi bấm khi đang ở trang YouTube.</p>
+          <p><b>Cách 2 — thủ công.</b> Dưới video YouTube bấm <b>“…” → “Show transcript”</b>, bôi đen toàn bộ
+            khung bên phải, copy, dán vào ô trên (app tự nhận mốc thời gian kiểu <code>0:45</code>).</p>
+          <p class="hint">Podcast/Spotify: dán bản transcript của tập nếu có. Không cần chuẩn từng chữ — có nội dung là soi được.</p>
+        </details>
       </div>
 
       <ol class="steps" id="steps" hidden>
         <li data-s="ingest">Lấy dữ liệu</li>
+        <li data-s="transcribe" id="tStep" hidden>Nghe video</li>
         <li data-s="content">Summary</li>
         <li data-s="factcheck">Fact-check</li>
         <li data-s="social">Social</li>

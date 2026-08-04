@@ -8,12 +8,21 @@ const CONTENT = {
   author: 'a',
   summary: { theme: 't', highlights: ['h1', 'h2'], conclusion: 'c', takeaway: 'k' },
   outline: [{ timestamp: '0:45', point: 'p' }],
-  stance: ['s'], facts: ['f1'], focusAnswer: null
+  stance: ['s'], facts: [{ claim: 'f1', supports: 'luận điểm chính' }],
+  descriptionGap: null, focusAnswer: null
 };
 const FACTCHECK = { claims: [{ claim: 'f1', verdict: 'solid', note: '', sources: [] }] };
 const SOCIAL = { readout: 'Một phản biện đáng chú ý về số liệu.', dataGaps: [] };
 const RECOMMEND = { items: [{ title: 'x', channel: 'c', url: 'http://x', why: 'w' }] };
-const SCORE = { score: 82, label: 'Đáng nghe trọn', reasons: ['r'], focusAnswer: 'đáp' };
+const SCORE = {
+  score: 82, label: 'Đáng nghe trọn', reasons: ['r'],
+  breakdown: [{ criterion: 'rich', impact: 'plus', note: 'dày dữ kiện' }],
+  focusAnswer: 'đáp'
+};
+const SCORE_OUT = {
+  ...SCORE,
+  breakdown: [{ criterion: 'rich', label: 'Nội dung dày', impact: 'plus', note: 'dày dữ kiện' }]
+};
 
 function fakeClaude(response) {
   const calls = [];
@@ -91,7 +100,7 @@ describe('runStep', () => {
       .toEqual(RECOMMEND);
     expect(await runStep('compose',
       { content: CONTENT, factcheck: FACTCHECK, social: SOCIAL, video: { title: 'T', durationSec: 60 }, question: 'q' },
-      {}, { callClaude: fakeClaude(SCORE) })).toEqual(SCORE);
+      {}, { callClaude: fakeClaude(SCORE) })).toEqual(SCORE_OUT);
   });
 
   it('rejects unknown steps', async () => {

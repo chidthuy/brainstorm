@@ -1,5 +1,6 @@
 import { fetchVideoData } from './ingest.js';
 import { callClaude as defaultCallClaude } from './claude.js';
+import { hasGemini, planWindows, transcribeWindow } from './gemini.js';
 import { buildContent, parseContent } from './passes/content.js';
 import { buildFactcheck, parseFactcheck } from './passes/factcheck.js';
 import { buildSocial, parseSocial } from './passes/social.js';
@@ -60,20 +61,38 @@ export async function runStep(step, payload = {}, opts = {}, deps = {}) {
       return {
         video: {
           id: v.id, title: v.title, channel: v.channel,
-          durationSec: v.durationSec, viewCount: v.viewCount
+          durationSec: v.durationSec, viewCount: v.viewCount,
+          commentCount: v.commentCount, publishedAt: v.publishedAt
         },
+        description: v.description ?? '',
         hasTranscript: !!v.transcript,
         transcriptSource: v.transcriptSource ?? null,
         transcriptText: v.transcript ? transcriptWithTimes(v.transcript) : null,
-        comments: v.comments ?? []
+        comments: v.comments ?? [],
+        // Không lấy được phụ đề thì client chuyển sang nhờ Gemini nghe lại video,
+        // ngay trên cùng trang — kèm sẵn kế hoạch cắt cửa sổ để nó gọi lần lượt.
+        gemini: hasGemini()
+          ? { available: true, windows: planWindows(v.durationSec) }
+          : { available: false, windows: [] }
       };
+    }
+    case 'transcribe': {
+      const { text, empty } = await transcribeWindow({
+        videoId: payload.videoId,
+        startSec: Number(payload.startSec ?? 0),
+        endSec: payload.endSec == null ? null : Number(payload.endSec)
+      });
+      return { text, empty };
     }
     case 'content':
       return run(
         buildContent({
           title: payload.title, channel: payload.channel,
           transcriptText: capTranscript(normalizePastedTranscript(payload.transcriptText ?? '')),
-          question: payload.question, language
+          question: payload.question, language,
+          description: payload.description ?? '',
+          publishedAt: payload.publishedAt ?? null,
+          transcriptSource: payload.transcriptSource ?? null
         }),
         parseContent
       );
@@ -88,7 +107,8 @@ export async function runStep(step, payload = {}, opts = {}, deps = {}) {
         buildCompose({
           content: payload.content, factcheck: payload.factcheck,
           social: payload.social, video: payload.video,
-          question: payload.question, language
+          question: payload.question, language,
+          seenThemes: payload.seenThemes ?? []
         }),
         parseCompose
       );

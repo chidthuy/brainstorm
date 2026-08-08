@@ -44,7 +44,7 @@ items = [
     ("Bar",                1075200, "Chi"),
     ("Ăn sáng",             680000, "Chi"),
     ("Cafe sáng",           723600, "Chi"),
-    ("Ăn tối BBQ",         2100000, "Tú 1.100.000 · Việt 1.000.000"),
+    ("Ăn tối BBQ",         "=$H$6+$H$7", "Tú và Việt ứng trả"),
     ("Ăn sáng 2",           645000, "Chi"),
     ("Snack",               584445, "Chi"),
     ("Snack (thêm)",        180000, "Chi"),
@@ -54,7 +54,8 @@ for i, (name, amount, payer) in enumerate(items):
     r = R0 + i
     fill = BAND_FILL if i % 2 else None
     put(r, 1, name, border=BOX, fill=fill)
-    put(r, 2, amount, color=BLUE, fmt=MONEY, border=BOX, fill=fill)
+    put(r, 2, amount, color=BLACK if isinstance(amount, str) else BLUE,
+        fmt=MONEY, border=BOX, fill=fill)
     put(r, 3, payer, size=9, color=MUTED, border=BOX, fill=fill)
     put(r, 4, f"=B{r}/$H$4", fmt=MONEY, border=BOX, fill=fill)
     for c in (5, 6):
@@ -80,29 +81,36 @@ put(4, 8, 6,       color=BLUE, fmt="0",   border=BOX)
 put(4, 9, "Số người", size=9, color=MUTED)
 put(5, 8, 3000000, color=BLUE, fmt=MONEY, border=BOX)
 put(5, 9, "Tiền cọc mỗi người đã đóng", size=9, color=MUTED)
+put(6, 8, 1100000, color=BLUE, fmt=MONEY, border=BOX)
+put(6, 9, "Tú ứng trả bữa BBQ", size=9, color=MUTED)
+put(7, 8, 1000000, color=BLUE, fmt=MONEY, border=BOX)
+put(7, 9, "Việt ứng trả bữa BBQ", size=9, color=MUTED)
 
 # --- chuyển tiền ----------------------------------------------------------
 T = TOT + 3
 put(T, 1, "CHUYỂN TIỀN", bold=True, size=11, color=DARK)
-put(T, 3, "Mọi người đóng cho Chi, Chi bank lại phần đã ứng cho Việt & Tú.",
+put(T, 3, "Tú và Việt không phải đóng — tiền hai bạn ứng đang dư.",
     size=9, italic=True, color=MUTED)
 
 T0 = T + 1
-for i, name in enumerate(["Quỳnh", "Hà", "Hiếu", "Việt", "Tú"]):
+for i, name in enumerate(["Quỳnh", "Hà", "Hiếu"]):
     r = T0 + i
     put(r, 1, f"{name}  →  Chi", border=BOX)
     put(r, 2, f"=$F${TOT}", bold=True, fmt=MONEY, border=BOX)
+    put(r, 3, "phần còn thiếu", size=9, color=MUTED)
 
-B0 = T0 + 5
-for i, (name, amount) in enumerate([("Tú", 1100000), ("Việt", 1000000)]):
+B0 = T0 + 3
+for i, (name, cell, advance) in enumerate([("Tú", "$H$6", "1.100.000"),
+                                           ("Việt", "$H$7", "1.000.000")]):
     r = B0 + i
     put(r, 1, f"Chi  →  {name}", border=BOX, fill=BAND_FILL)
-    put(r, 2, amount, bold=True, color=BLUE, fmt=MONEY, border=BOX, fill=BAND_FILL)
-    put(r, 3, "hoàn lại tiền đã ứng trả bữa BBQ", size=9, color=MUTED)
+    put(r, 2, f"={cell}-$F${TOT}", bold=True, fmt=MONEY, border=BOX, fill=BAND_FILL)
+    put(r, 3, f"đã ứng {advance} cho BBQ → đang dư, nhận lại phần chênh",
+        size=9, color=MUTED)
 
 NET = B0 + 2
 put(NET, 1, "Chi thực nhận", bold=True)
-put(NET, 2, f"=SUM(B{T0}:B{T0+4})-SUM(B{B0}:B{B0+1})", bold=True, fmt=MONEY)
+put(NET, 2, f"=SUM(B{T0}:B{T0+2})-SUM(B{B0}:B{B0+1})", bold=True, fmt=MONEY)
 for c in range(1, 3):
     ws.cell(row=NET, column=c).border = TOTAL_BORDER
     ws.cell(row=NET, column=c).fill = TOTAL_FILL

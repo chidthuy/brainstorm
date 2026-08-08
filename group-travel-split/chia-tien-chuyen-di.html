@@ -1,0 +1,462 @@
+<title>Chia tiền chuyến đi — 6 người</title>
+<style>
+  :root {
+    --ground: #EFF3F2;
+    --surface: #FFFFFF;
+    --surface-2: #E7EDEB;
+    --ink: #10222A;
+    --ink-2: #5A6B71;
+    --line: #D8E0DE;
+    --line-strong: #B9C6C3;
+    --jade: #0C6E55;
+    --jade-soft: #DCEDE6;
+    --clay: #A8412B;
+    --clay-soft: #F5E3DE;
+
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0C1517;
+      --surface: #131F22;
+      --surface-2: #19282B;
+      --ink: #E4EBE9;
+      --ink-2: #90A3A3;
+      --line: #24373A;
+      --line-strong: #354C4F;
+      --jade: #55C9A0;
+      --jade-soft: #14332B;
+      --clay: #E68C73;
+      --clay-soft: #33201B;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0C1517;
+    --surface: #131F22;
+    --surface-2: #19282B;
+    --ink: #E4EBE9;
+    --ink-2: #90A3A3;
+    --line: #24373A;
+    --line-strong: #354C4F;
+    --jade: #55C9A0;
+    --jade-soft: #14332B;
+    --clay: #E68C73;
+    --clay-soft: #33201B;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 2.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0.4rem 0 0;
+    font-weight: 600;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 1.5rem;
+  }
+
+  .roster {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .chip {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink-2);
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .tile {
+    background: var(--surface);
+    padding: 1.1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .tile .label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+
+  .tile .value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.28rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tile .value.hero { color: var(--jade); }
+
+  .tile .sub {
+    font-size: 0.78rem;
+    color: var(--ink-2);
+  }
+
+  .scroll {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 32rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  caption {
+    caption-side: top;
+    text-align: left;
+    padding: 0.85rem 1rem;
+    font-size: 0.78rem;
+    color: var(--ink-2);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+
+  th, td {
+    padding: 0.62rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+
+  thead th {
+    font-size: 0.7rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 600;
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+
+  .num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tfoot td {
+    background: var(--surface-2);
+    font-weight: 600;
+    border-bottom: none;
+    border-top: 2px solid var(--line-strong);
+  }
+
+  .name { font-weight: 600; white-space: nowrap; }
+
+  .pill {
+    display: inline-block;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.16rem 0.55rem;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .pill.get { background: var(--jade-soft); color: var(--jade); }
+  .pill.pay { background: var(--clay-soft); color: var(--clay); }
+
+  .transfers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .transfers li {
+    background: var(--surface);
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .transfers .from { font-weight: 600; }
+  .transfers .arrow { color: var(--ink-2); }
+  .transfers .amt {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.95rem;
+  }
+
+  .note {
+    border-left: 3px solid var(--line-strong);
+    padding: 0.15rem 0 0.15rem 0.9rem;
+    color: var(--ink-2);
+    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .note strong { color: var(--ink); font-weight: 600; }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--surface-2);
+    padding: 0.05em 0.3em;
+    border-radius: 2px;
+  }
+
+  footer {
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Chốt sổ chuyến đi</div>
+    <h1>Bảng chia tiền — 6 người</h1>
+    <div class="roster">
+      <span class="chip">Chi</span>
+      <span class="chip">Quỳnh</span>
+      <span class="chip">Hà</span>
+      <span class="chip">Hiếu</span>
+      <span class="chip">Việt</span>
+      <span class="chip">Tú</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="tiles">
+      <div class="tile">
+        <span class="label">Tổng chi</span>
+        <span class="value">23.173.645</span>
+        <span class="sub">9 khoản</span>
+      </div>
+      <div class="tile">
+        <span class="label">Quỹ cọc</span>
+        <span class="value">18.000.000</span>
+        <span class="sub">3.000.000 × 6 người</span>
+      </div>
+      <div class="tile">
+        <span class="label">Mỗi người chịu</span>
+        <span class="value hero">3.862.274</span>
+        <span class="sub">chia đều 6 phần</span>
+      </div>
+      <div class="tile">
+        <span class="label">Còn thiếu</span>
+        <span class="value">5.173.645</span>
+        <span class="sub">862.274 / người</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chốt sổ từng người</h2>
+    <div class="scroll">
+      <table>
+        <caption>Mỗi người còn phải bù thêm <strong>862.274đ</strong> ngoài tiền cọc. Ai đã ứng nhiều hơn số đó thì được nhận lại phần chênh.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Thành viên</th>
+            <th scope="col" class="num">Đã ứng ngoài quỹ</th>
+            <th scope="col" class="num">Cần bù thêm</th>
+            <th scope="col" class="num">Chênh lệch</th>
+            <th scope="col">Chốt (làm tròn)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">Chi</td>
+            <td class="num">3.073.645</td>
+            <td class="num">862.274</td>
+            <td class="num">+2.211.371</td>
+            <td><span class="pill get">Nhận 2.211.500</span></td>
+          </tr>
+          <tr>
+            <td class="name">Tú</td>
+            <td class="num">1.100.000</td>
+            <td class="num">862.274</td>
+            <td class="num">+237.726</td>
+            <td><span class="pill get">Nhận 237.700</span></td>
+          </tr>
+          <tr>
+            <td class="name">Việt</td>
+            <td class="num">1.000.000</td>
+            <td class="num">862.274</td>
+            <td class="num">+137.726</td>
+            <td><span class="pill get">Nhận 137.700</span></td>
+          </tr>
+          <tr>
+            <td class="name">Quỳnh</td>
+            <td class="num">0</td>
+            <td class="num">862.274</td>
+            <td class="num">−862.274</td>
+            <td><span class="pill pay">Trả 862.300</span></td>
+          </tr>
+          <tr>
+            <td class="name">Hà</td>
+            <td class="num">0</td>
+            <td class="num">862.274</td>
+            <td class="num">−862.274</td>
+            <td><span class="pill pay">Trả 862.300</span></td>
+          </tr>
+          <tr>
+            <td class="name">Hiếu</td>
+            <td class="num">0</td>
+            <td class="num">862.274</td>
+            <td class="num">−862.274</td>
+            <td><span class="pill pay">Trả 862.300</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Tổng</td>
+            <td class="num">5.173.645</td>
+            <td class="num">5.173.645</td>
+            <td class="num">0</td>
+            <td>Cân sổ</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chuyển tiền cho gọn</h2>
+    <ul class="transfers">
+      <li><span class="from">Quỳnh</span> <span class="arrow">→</span> <span>Chi</span> <span class="amt">862.300</span></li>
+      <li><span class="from">Hà</span> <span class="arrow">→</span> <span>Chi</span> <span class="amt">862.300</span></li>
+      <li><span class="from">Hiếu</span> <span class="arrow">→</span> <span>Tú</span> <span class="amt">237.700</span></li>
+      <li><span class="from">Hiếu</span> <span class="arrow">→</span> <span>Việt</span> <span class="amt">137.700</span></li>
+      <li><span class="from">Hiếu</span> <span class="arrow">→</span> <span>Chi</span> <span class="amt">486.900</span></li>
+    </ul>
+    <div class="note">
+      <span>5 lượt chuyển là xong. Chi nhận đủ <strong>2.211.500</strong>, Tú nhận <strong>237.700</strong>, Việt nhận <strong>137.700</strong>.</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chi tiết các khoản</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Khoản chi</th>
+            <th scope="col">Người trả</th>
+            <th scope="col" class="num">Số tiền</th>
+            <th scope="col" class="num">Mỗi người</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Lưu trú</td><td>Chi</td><td class="num">13.700.000</td><td class="num">2.283.333</td></tr>
+          <tr><td>Ăn trưa Cậu Khấu</td><td>Chi</td><td class="num">1.228.000</td><td class="num">204.667</td></tr>
+          <tr><td>Ăn tối Hồng Phát</td><td>Chi</td><td class="num">2.257.400</td><td class="num">376.233</td></tr>
+          <tr><td>Bar</td><td>Chi</td><td class="num">1.075.200</td><td class="num">179.200</td></tr>
+          <tr><td>Ăn sáng</td><td>Chi</td><td class="num">680.000</td><td class="num">113.333</td></tr>
+          <tr><td>Cafe sáng</td><td>Chi</td><td class="num">723.600</td><td class="num">120.600</td></tr>
+          <tr><td>Ăn tối BBQ</td><td>Tú 1.100.000 · Việt 1.000.000</td><td class="num">2.100.000</td><td class="num">350.000</td></tr>
+          <tr><td>Ăn sáng 2</td><td>Chi</td><td class="num">645.000</td><td class="num">107.500</td></tr>
+          <tr><td>Snack <span style="color:var(--ink-2)">(584.445 + 180.000)</span></td><td>Chi</td><td class="num">764.445</td><td class="num">127.408</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Tổng</td>
+            <td></td>
+            <td class="num">23.173.645</td>
+            <td class="num">3.862.274</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Cách tính</h2>
+    <div class="note">
+      <span><strong>Giả định:</strong> tiền cọc 3.000.000/người được gom thành quỹ chung do Chi giữ, và Chi dùng quỹ này để thanh toán. Nếu tiền cọc nộp cho bên khác hoặc chưa đưa cho Chi thì báo lại, số liệu sẽ khác.</span>
+      <span>Chi ứng tổng <code>21.073.645</code> (tất cả trừ BBQ), trong đó <code>18.000.000</code> lấy từ quỹ cọc → phần ứng thêm bằng tiền túi là <code>3.073.645</code>.</span>
+      <span>Tú và Việt trả BBQ trực tiếp <code>1.100.000</code> và <code>1.000.000</code>, đây cũng là tiền ứng ngoài quỹ.</span>
+      <span>Phần mỗi người phải chịu <code>23.173.645 ÷ 6 = 3.862.274</code>, trừ đi cọc <code>3.000.000</code> còn <code>862.274</code> phải bù. So sánh số bù này với số đã ứng ra chênh lệch ở bảng chốt sổ.</span>
+    </div>
+  </section>
+
+  <footer>
+    Đơn vị: VNĐ · Cột &ldquo;chốt&rdquo; làm tròn đến 100đ; phần lẻ gom vào dòng của Chi nên tổng thu và tổng chi khớp ở mức 2.586.900đ.
+  </footer>
+
+</div>

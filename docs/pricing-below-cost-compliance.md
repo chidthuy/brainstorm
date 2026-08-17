@@ -389,3 +389,12 @@ sẵn dữ liệu chứng minh.
 7. **Tech**: đưa `cost_rate_card` + guardrail hai tầng + báo cáo margin âm vào backlog cùng
    phase với tính năng bảng giá 2 tầng của mô hình Agent — làm sau sẽ phải backfill dữ liệu
    giá thành lịch sử, việc rất tốn kém.
+
+---
+
+## 9. Đọc tiếp
+
+Nếu doanh nghiệp thuộc nhóm dẫn đầu thị trường, rủi ro chuyển từ Điều 45.6 (phạt tối đa
+2 tỷ) sang **Điều 27.1.a — lạm dụng vị trí thống lĩnh, phạt đến 10% tổng doanh thu**, và bộ
+hồ sơ cần chuẩn bị rộng hơn nhiều: xem
+[`pricing-below-cost-large-player-defense.md`](./pricing-below-cost-large-player-defense.md).

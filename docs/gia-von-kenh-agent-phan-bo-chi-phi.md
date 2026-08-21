@@ -205,3 +205,12 @@ ro khác nhau.
 5. Trình luôn con số đầy đủ: gỡ BD ra thì phải cộng hoa hồng Agent và chi phí quản trị kênh
    vào. Dư địa thật thường rất mỏng, đôi khi âm. Trình thiếu vế này là mất tin cậy.
 6. Mang theo số liệu mục 6, không mang theo mô tả mô hình.
+
+---
+
+## 9. Đọc tiếp
+
+Mục 4 ở trên nói *không thể bỏ fix cost*. Nhưng có một nhóm chi phí **được phép** tách ra
+khỏi giá thành đơn vị — chi phí đầu tư phát triển thị trường (đội BD đi mở thị trường mới,
+marketing thương hiệu cấp tập đoàn). Đây là lập luận khác và có cơ sở vững:
+[`chi-phi-phat-trien-thi-truong-vs-gia-thanh.md`](./chi-phi-phat-trien-thi-truong-vs-gia-thanh.md).

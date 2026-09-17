@@ -29,6 +29,7 @@ Weight là ô nhập — đổi ở `Setup!E44:E48`, cả file tính lại. Mu�
 - **Pass gate**: Focus achievement khoá tiền Lead — ≥100% mở 100%, ≥90% mở 90%, ≥80% mở 80%, <80% = 0. Tắt bằng `Setup!C22 = OFF`.
 - **Target luỹ kế = phasing luỹ kế**, nên so sánh giữa năm đúng với kế hoạch tới thời điểm đó.
 - **Prorate**: số tháng hưởng ở `Setup` cột J.
+- **Quý chưa chốt**: quý lớn hơn `Setup!C5` có status "Chưa chốt", không tính tiền. Focus chỉ trả khi `Setup!C5 = 4`. Vì vậy "Total Lead / TOTAL payout" là số **đã trả đến quý chốt**, không phải dự phóng cả năm.
 
 ## Validation có sẵn
 
@@ -41,8 +42,12 @@ Weight là ô nhập — đổi ở `Setup!E44:E48`, cả file tính lại. Mu�
 
 6 nhân sự (SE-001…SE-006) với phasing cả năm và actual Jan–Sep. Xoá trước khi dùng: `Setup` dòng 53–58, cột FY Target và vùng tuần ở `Weekly_Tracker`.
 
-## Dựng lại file
+## Dựng lại & kiểm tra
 
 ```bash
-pip install openpyxl && python3 build.py
+pip install openpyxl && python3 build.py     # dựng file
+python3 audit.py                              # soát mọi tham chiếu chéo sheet
+pip install formulas && python3 check_values.py   # đối chiếu số tính ra với tính tay
 ```
+
+`audit.py` kiểm tra 600 tham chiếu Tracking → Weekly_Tracker (đúng dòng KPI, đúng loại Phasing/Actual, đúng cột tuần cuối quý) cùng các tham chiếu sang `Setup`. `check_values.py` tính lại toàn bộ chuỗi target → achievement → payout factor → tiền thưởng bằng Python và so với kết quả công thức.

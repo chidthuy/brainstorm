@@ -282,8 +282,9 @@ for p in range(NPEOPLE):
                     L = get_column_letter(cidx)
                     put(ws, r, cidx, f'=IFERROR({L}{r-1}/{L}{r-2},"")', nf=PCT, font=f(9), fill=CALC_FILL)
         # validation column: phasing vs FY target / actual vs FY target
+        anchor = wk_row(p, 0, 0)          # Emp Code is merged on the person's first row
         put(ws, rk, WCOL_CHECK,
-            f'=IF($A{rk}="","",IF($G{rk}=0,"chưa nhập FY target",'
+            f'=IF($A${anchor}="","",IF($G{rk}=0,"chưa nhập FY target",'
             f'IF(ROUND(H{rk}-$G{rk},2)=0,"OK","Lệch "&TEXT(H{rk}-$G{rk},"#,##0"))))',
             font=f(9, True, RED_TXT), align="center")
         put(ws, rk + 1, WCOL_CHECK, f'=IFERROR(H{rk+1}/$G{rk},"")', nf=PCT, align="center",
@@ -389,8 +390,9 @@ for p in range(NPEOPLE):
         put(ws, r, 23, f'=IF({S_GATE}="OFF",1,IF(U{r}>={S_G1},{S_GP1},IF(U{r}>={S_G2},{S_GP2},'
                        f'IF(U{r}>={S_G3},{S_GP3},{S_GP4}))))', nf=PCT0, align="center", fill=CALC_FILL)
         put(ws, r, 24, f"=N{r}*W{r}", nf=PCT, font=f(10, True), fill=CALC_FILL)
-        put(ws, r, 25, f'=IF($A{r}="","",IF(F{r}<=0,"No target",IF(X{r}>=1,"On track",'
-                       f'IF(X{r}>=0.8,"Watch","Behind"))))', align="center", font=f(10, True), fill=CALC_FILL)
+        put(ws, r, 25, f'=IF($A{r}="","",IF({q+1}>{S_QTR},"Chưa chốt",IF(F{r}<=0,"No target",'
+                       f'IF(X{r}>=1,"On track",IF(X{r}>=0.8,"Watch","Behind")))))',
+            align="center", font=f(10, True), fill=CALC_FILL)
         put(ws, r, 26, f"={ytd(p,4,0,q)}", nf=NUM, fill=TRACK_FILL)
         put(ws, r, 27, f"={ytd(p,4,1,q)}", nf=NUM, fill=TRACK_FILL)
         put(ws, r, 28, f"=IF(Z{r}<=0,0,AA{r}/Z{r})", nf=PCT, fill=TRACK_FILL)
@@ -443,8 +445,8 @@ for c1, c2, txt, hcol in groups:
     c.alignment = Alignment(horizontal="center", vertical="center")
 heads = ["Emp Code", "Name", "Region", "Team", "ATVP (prorated)", "Lead pot", "Focus pot",
          "Q1", "Q2", "Q3", "Q4", "Earned YTD Q1", "Earned YTD Q2", "Earned YTD Q3", "Earned YTD Q4",
-         "Pay Q1", "Pay Q2", "Pay Q3", "Pay Q4", "Total Lead FY",
-         "Focus Ach FY", "Focus factor", "Focus payout", "TOTAL FY payout", "% of ATVP", "Note"]
+         "Pay Q1", "Pay Q2", "Pay Q3", "Pay Q4", "Total Lead (đến quý chốt)",
+         "Focus Ach FY", "Focus factor", "Focus payout", "TOTAL payout (đến quý chốt)", "% of ATVP", "Note"]
 for i, h in enumerate(heads):
     col = i + 2
     fill = NAVY
@@ -477,7 +479,7 @@ for p in range(NPEOPLE):
     for q in range(4):
         put(ws, r, 9 + q, f"=Tracking!$X${trow + q}", nf=PCT, fill=LEAD_FILL)
         ec = get_column_letter(9 + q)
-        put(ws, r, 13 + q, f"=$H{r}*{q+1}/4*{ec}{r}", nf=NUM, fill=LEAD_FILL)
+        put(ws, r, 13 + q, f"=IF({q+1}>{S_QTR},0,$G{r}*{q+1}/4*{ec}{r})", nf=NUM, fill=LEAD_FILL)
     put(ws, r, 17, f'=IF({S_CLAW}="Y",M{r},MAX(0,M{r}))', nf=NUM, font=f(10, True))
     for q in range(2, 5):
         prev, cur = get_column_letter(11 + q), get_column_letter(12 + q)
@@ -486,7 +488,7 @@ for p in range(NPEOPLE):
     put(ws, r, 21, f"=SUM(Q{r}:T{r})", nf=NUM, font=f(10, True), fill=CALC_FILL)
     put(ws, r, 22, f"=Tracking!$U${trow + 3}", nf=PCT, fill=FOCUS_FILL)
     put(ws, r, 23, f"=Tracking!$V${trow + 3}", nf=PCT, fill=FOCUS_FILL)
-    put(ws, r, 24, f"=$I{r}*W{r}", nf=NUM, font=f(10, True), fill=FOCUS_FILL)
+    put(ws, r, 24, f"=IF({S_QTR}<4,0,$H{r}*W{r})", nf=NUM, font=f(10, True), fill=FOCUS_FILL)
     put(ws, r, 25, f"=U{r}+X{r}", nf=NUM, font=f(11, True), fill=CALC_FILL)
     put(ws, r, 26, f"=IF($F{r}<=0,0,Y{r}/$F{r})", nf=PCT, font=f(10, True), fill=CALC_FILL)
     put(ws, r, 27, f'=IF($B{r}="","",IF(MAX(I{r}:L{r})>={S_PMAX},"Chạm trần payout",'

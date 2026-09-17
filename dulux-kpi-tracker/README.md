@@ -1,68 +1,48 @@
-# Dulux Sales Channel – KPI & Incentive Tracker 2026
+# Dulux Sales Channel – KPI Tracker 2026
 
-Template Excel cho 1 sales channel của Dulux: **FY Target → Phasing theo tuần → Actual → Performance tracking → Incentive**.
+File: `Dulux_Channel_KPI_Tracker_2026.xlsx` — 4 sheet, không có sheet diễn giải.
 
-File: `Dulux_Channel_KPI_Incentive_Tracker_2026_Template.xlsx`
+| Sheet | Nội dung |
+|---|---|
+| `Setup` | Tham số + KPI/weight + danh sách nhân sự. Ô vàng = nhập. Có dropdown & check tự báo lỗi. |
+| `Weekly_Tracker` | Sheet nhập liệu duy nhất: mỗi người 5 KPI × 3 dòng (Phasing / Actual / % Achieved) × 12 tháng × 5 tuần, kèm FY Target và cột Check. |
+| `Tracking` | Luỹ kế theo quý: achievement, payout factor từng KPI, Lead factor, Focus factor, pass gate, net factor, status. Cuối sheet có tổng kênh tại quý chọn ở `Setup!C5`. |
+| `Incentive` | Tiền Lead trả từng quý + Focus cuối năm + tổng FY từng người. |
 
-## Bộ KPI (5 mục)
+## KPI & weight (Setup mục G)
 
-| Code | KPI | Nhóm | Weight | Đơn vị | Chu kỳ đo | Chu kỳ trả |
-|---|---|---|---|---|---|---|
-| K1 | Invoiced Value | **Lead – 70%** | 50% | MVND | Luỹ kế theo quý | Hàng quý |
-| K2 | Key account approach / Site check | Lead | 20% | Roadshow | Luỹ kế theo quý | Hàng quý |
-| K3 | Spec-in Value | **Focus – 30%** | 15% | MVND | Luỹ kế cả năm | Cuối năm |
-| K4 | Engaged Architect (Submit Design) | Focus | 15% | D&B | Luỹ kế cả năm | Cuối năm |
-| K5 | Spec-in Design (submitted design) | Theo dõi | 0% | Designs | Luỹ kế cả năm | – |
+| Code | KPI | Nhóm | Weight | Đơn vị |
+|---|---|---|---|---|
+| K1 | Invoiced Value | Lead 70% | 50% | MVND |
+| K2 | Key account approach / Site check | Lead | 20% | Roadshow |
+| K3 | Spec-in Value | Focus 30% | 15% | MVND |
+| K4 | Engaged Architect (Submit Design) | Focus | 15% | D&B |
+| K5 | Spec-in Design | Theo dõi | 0% | Designs |
 
-K5 là chỉ số dẫn dắt của K3 (~50 MVND/design). Đang để weight 0%; muốn tính điểm cho đủ 5 mục thì gõ weight vào `KPI_Framework!F10` và chia lại F6:F9 sao cho tổng = 100% — cả file tự tính lại.
+Weight là ô nhập — đổi ở `Setup!E44:E48`, cả file tính lại. Muốn tính điểm cho đủ 5 KPI thì gõ weight cho K5 và chia lại 4 dòng trên sao cho tổng = 100% (ô check sẽ báo đỏ nếu lệch).
 
-## 9 sheet
+## Logic tính
 
-| Sheet | Vai trò | Ai nhập |
-|---|---|---|
-| `Guide` | Hướng dẫn, quy ước màu, danh sách điểm cần chốt với HR/BU | – |
-| `Parameters` | Tỷ trọng Lead/Focus, đường trả thưởng, pass gate, region, quý báo cáo | Channel manager |
-| `KPI_Framework` | 5 KPI, weight, tần suất, data source, định nghĩa | Channel manager + HR |
-| `Team_Master` | Nhân sự, số tháng hưởng, ATVP → tự chia Lead pot / Focus pot | HR + channel manager |
-| `Weekly_Tracker` ⭐ | **Sheet nhập liệu duy nhất** – mỗi người 5 KPI × 3 dòng (Phasing / Actual / % Achieved) × 12 tháng × 5 tuần | Sales + sales admin |
-| `Target_FY` | Nhập FY Target chính thức (cột G); phần còn lại gom từ phasing tuần; cột Check báo lệch | Channel manager |
-| `Actual_Monthly` | Chỉ đọc – gom actual tuần → tháng → quý → YTD | – |
-| `Tracking` | Achievement luỹ kế, payout factor từng KPI, Lead factor, Focus factor, pass gate, RAG | – |
-| `Incentive_Calc` | Tiền Lead từng quý + Focus cuối năm + tổng FY từng người | – |
-| `Dashboard` | Toàn kênh / theo region / theo từng người tại quý chọn ở `Parameters!C7` | – |
-
-`Weekly_Tracker` giữ đúng format team đang dùng (Phasing / Actual / % Achieved theo tuần), nhưng nối thẳng lên tầng quý và tiền thưởng nên không phải nhập lại ở đâu nữa.
-
-## Quy tắc tính
-
-- **Payout curve** (`Parameters` mục C): <80% → 0% · 80% → 50% · 100% → 100% · ≥120% → 150% (trần), nội suy tuyến tính giữa các mốc.
-- **Lead KPI trả luỹ kế**: `Tiền quý n = Lead pot × n/4 × factor luỹ kế đến quý n − tiền đã trả các quý trước`. Quý sau tụt thì trả 0, không thu hồi (bật clawback tại `Parameters!C31`).
+- **Payout curve**: <80% → 0% · 80% → 50% · 100% → 100% · ≥120% → 150% (trần), nội suy tuyến tính. Mốc sửa ở `Setup` mục C.
+- **Lead KPI**: đo luỹ kế theo quý (Q3 = Jan–Sep). `Tiền quý n = Lead pot × n/4 × factor luỹ kế đến quý n − tiền đã trả trước đó`. Quý tụt thì trả 0, không thu hồi (bật ở `Setup!C30`).
 - **Focus KPI**: luỹ kế cả năm, trả 1 lần sau khi chốt Q4, cap 150%.
-- **Pass gate**: kết quả Focus KPI khoá tiền Lead KPI – ≥100% mở 100%, ≥90% mở 90%, ≥80% mở 80%, <80% không trả. Tắt bằng `Parameters!C23 = OFF`.
-- **Target luỹ kế = phasing luỹ kế**, nên achievement giữa năm so đúng với kế hoạch tới thời điểm đó, không so với cả năm.
-- **Prorate**: người vào/ra giữa năm điền số tháng hưởng ở `Team_Master` cột K.
+- **Pass gate**: Focus achievement khoá tiền Lead — ≥100% mở 100%, ≥90% mở 90%, ≥80% mở 80%, <80% = 0. Tắt bằng `Setup!C22 = OFF`.
+- **Target luỹ kế = phasing luỹ kế**, nên so sánh giữa năm đúng với kế hoạch tới thời điểm đó.
+- **Prorate**: số tháng hưởng ở `Setup` cột J.
 
-## Quy ước màu
+## Validation có sẵn
 
-- Chữ **xanh dương** trên nền vàng nhạt = ô nhập liệu.
-- Chữ **đen** = công thức · chữ **xanh lá** = lấy từ sheet khác. Không sửa.
-- Nền xanh nhạt = Lead KPI · vàng nhạt = Focus KPI · xám = KPI chỉ theo dõi.
+- Dropdown: quý (1–4), Gate ON/OFF, clawback Y/N, Region (lấy từ `Setup` mục F), Status.
+- Chặn nhập: weight 0–100%, mốc payout 0–300%, eligible months 0–12, ATVP ≥ 0, ô tuần chỉ nhận số ≥ 0.
+- Check tự động: `Lead + Focus = 100%` · tổng weight = 100% · Lead/Focus weight khớp tỷ trọng · cột Check ở `Weekly_Tracker` báo "OK" hoặc "Lệch x" khi phasing cả năm chưa khớp FY Target.
+- Cảnh báo màu: % Achieved theo tuần (đỏ <80%, vàng <100%, xanh ≥100%), thang màu ở các cột achievement, status On track / Watch / Behind.
 
-## Trước khi dùng thật
+## Dữ liệu mẫu
 
-1. Xoá dữ liệu mẫu: `Team_Master` dòng 6–11, vùng tuần ở `Weekly_Tracker`, cột `FY Target (nhập)` ở `Target_FY`.
-2. Chốt với HR/BU các điểm đang là giả định (liệt kê đầy đủ ở sheet `Guide` mục 5):
-   - KPI thứ 5 có tính điểm không,
-   - mức payout tại ngưỡng 80% (đang giả định 50%),
-   - hai bậc giữa của pass gate (90% / 80%),
-   - định nghĩa "site check hợp lệ" và "engaged architect",
-   - thời điểm ghi nhận Spec-in Value,
-   - ATVP từng người.
-3. **Không chèn/xoá dòng giữa bảng** – `Weekly_Tracker`, `Target_FY`, `Actual_Monthly`, `Tracking`, `Incentive_Calc` khớp dòng theo thứ tự `Team_Master`. Template có sẵn 15 slot nhân sự; cần thêm thì mở rộng đồng thời cả 5 sheet (hoặc sửa `NPEOPLE` trong `build/common.py` rồi dựng lại).
+6 nhân sự (SE-001…SE-006) với phasing cả năm và actual Jan–Sep. Xoá trước khi dùng: `Setup` dòng 53–58, cột FY Target và vùng tuần ở `Weekly_Tracker`.
 
 ## Dựng lại file
 
 ```bash
-pip install openpyxl
-cd build && python3 build_p1.py && python3 build_p2.py && python3 build_p3.py
+pip install openpyxl && python3 build.py
 ```

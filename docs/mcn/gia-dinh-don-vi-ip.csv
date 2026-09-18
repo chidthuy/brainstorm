@@ -1,0 +1,39 @@
+nhom,tham_so,don_vi,downside,base,upside,ghi_chu
+Chung,Ty le huy va hoan hang,% GMV gop,25,18,13,Hoa hong chi tinh tren GMV rong
+Chung,Hoa hong affiliate tu nhan hang,% GMV rong,15,20,24,Tuy nganh hang; my pham/TPCN cao hon
+Chung,Phi nen tang TikTok Shop,% GMV,12.5,12.5,15.5,Nguoi ban chiu - KHONG tinh vao chi phi MCN
+Chung,Phi booking co dinh moi phien,trieu VND,0,0,10,Chi ap dung tu thang 10 voi IP da co ten tuoi
+Chung,Thuong dat target,% GMV rong,0,0,2,De trong upside
+IP nguoi that,Chi phi dung IP mot lan,trieu VND,80,60,55,Casting 8 + dao tao 15 + bo nhan dien 20 + thuong ky 15 + phap ly 2
+IP nguoi that,GMV moi phien - uom T1-T3,trieu VND,5,10,18,12 phien/thang
+IP nguoi that,GMV moi phien - tang truong som T4-T6,trieu VND,12.5,25,46,16 phien/thang
+IP nguoi that,GMV moi phien - tang truong T7-T9,trieu VND,20,40,73,18 phien/thang
+IP nguoi that,GMV moi phien - on dinh T10+,trieu VND,30,60,110,20 phien/thang
+IP nguoi that,So phien moi thang - on dinh,phien,20,20,20,4 gio moi phien
+IP nguoi that,Luong cung talent - uom,trieu VND/thang,12,12,12,
+IP nguoi that,Luong cung talent - on dinh,trieu VND/thang,15,15,15,Thi truong thue ngoai 15-50
+IP nguoi that,Ty le chia hoa hong cho talent,% doanh thu MCN,30,30,28,Quyet dinh thuong mai
+IP nguoi that,Chi phi e-kip phan bo,trieu VND/thang,27,27,27,1 e-kip 3 nguoi ~40tr phuc vu 1.5 IP
+IP nguoi that,Studio va thiet bi phan bo,trieu VND/thang,6,6,6,1 studio 18tr phuc vu 3 IP theo ca
+IP nguoi that,Quang cao keo view - uom,% GMV rong,8,8,8,
+IP nguoi that,Quang cao keo view - on dinh,% GMV rong,3,3,3,
+IP nguoi that,Mau san pham va dao cu,trieu VND/thang,3,3,3,
+IP nguoi that,Lai gop on dinh,trieu VND/thang,-17.2,57.2,222.3,Ket qua tinh - khong nhap tay
+IP nguoi that,Bien lai gop tren doanh thu,%,-,29.1,-,Ket qua tinh
+IP nguoi that,Dinh von phai bo ra,trieu VND,449,251,146,Ket qua tinh
+IP nguoi that,Thang hoa von luy ke,thang,khong hoa von,13,7,Ket qua tinh
+IP nguoi that,Ty le roi rung tai cua thang 3,%,45,30,20,
+IP nguoi that,Ty le roi bo hang nam sau on dinh,%/nam,25,15,10,
+IP nguoi that,Chi phi chim cua 1 IP that bai gate T3,trieu VND,-,186,-,Ket qua tinh; gate T2 chi con 144
+IP AI,Chi phi dung IP AI mot lan,trieu VND,30,30,30,Nhan vat + voice + persona + tich hop
+IP AI,Thoi gian toi phien ban duoc,tuan,6,4,2,
+IP AI,GMV moi gio live,trieu VND,0.8,1.5,2.5,Tham so it du lieu cong khai nhat
+IP AI,So gio live moi ngay,gio,10,12,14,
+IP AI,So ngay live moi thang,ngay,26,26,26,
+IP AI,Ty le huy va hoan hang,% GMV gop,25,22,20,Cao hon IP nguoi that
+IP AI,License va compute,trieu VND/thang,6,8,10,
+IP AI,Van hanh va truc chat,trieu VND/thang,10,12,14,1 nguoi phu trach 3-5 IP AI
+IP AI,Quang cao keo view,% GMV rong,5,5,4,
+IP AI,Chi phi khac,trieu VND/thang,2,2,2,
+IP AI,Lai gop on dinh,trieu VND/thang,2.3,32.8,105.0,Ket qua tinh - khong nhap tay
+IP AI,Bien lai gop tren doanh thu,%,8,45,66,Ket qua tinh

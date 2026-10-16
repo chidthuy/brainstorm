@@ -107,10 +107,7 @@ Bảng giá niêm yết PTTM được tổ chức thành **ba bậc**, mỗi b�
 
 **Phễu & kênh**
 
-```
-380 lead  →  ~68 lịch hẹn (18%)  →  35 đến viện (52%)  ┐
-                                     5 đến viện từ Partner ┴→ 40 đến viện → 25 khách (~63%)
-```
+380 lead → ~68 lịch hẹn (18%) → 35 đến viện (52%) **+ 5 đến viện từ Partner = 40 đến viện → 25 khách (~63%)**
 
 | Kênh | Lead | Đến viện | Trọng tâm |
 |---|---:|---:|---|

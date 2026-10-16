@@ -1,6 +1,6 @@
 # Kế hoạch Kinh doanh Tăng trưởng Mới 2026–2027
 **Bệnh viện Thẩm mỹ Thu Cúc Sài Gòn**
-*Giai đoạn: Q4/2026 – Q1/2027 · Phiên bản 3.0 · 16/10/2026*
+*Giai đoạn: Q4/2026 – Q1/2027 · Phiên bản 3.1 · 16/10/2026*
 
 ---
 
@@ -12,8 +12,8 @@
 
 | BU | Mảng kinh doanh | Vai trò | Trần chi phí Sale & MKT | Doanh thu mục tiêu |
 |---|---|---|---:|---:|
-| **BU1** | **Affiliate & Social Growth** — Phẫu thuật & Thẩm mỹ | Động cơ doanh thu chính | 30% | 500 tr/tháng |
-| **BU2** | **Beauty Entry** — Phun xăm Mày & Môi | Dịch vụ cửa ngõ, nuôi tệp bán chéo | 15% | 120 tr/tháng |
+| **BU1** | **Social & Partner Sales** — Phẫu thuật & Thẩm mỹ | Động cơ doanh thu chính | 30% | 500 tr/tháng |
+| **BU2** | **Hook Products** — Sản phẩm mồi: Phun xăm Mày & Môi | Kéo khách mới chi phí thấp, dẫn dắt sang PTTM | 15% | 120 tr/tháng |
 | **BU3** | **Medical Tourism** — Du lịch Y tế & Lưu trú Hồi phục | Thị trường mới: Việt kiều, khách liên tỉnh | 30% | 700 tr/mùa Tết |
 | **BU4** | **B2B** — Khám sức khỏe Doanh nghiệp | Doanh thu hợp đồng, tiếp cận tệp nhân viên | 10% | 450 tr/Q1 |
 
@@ -30,8 +30,8 @@
 
 | BU | T11 | T12 | T1/27 | T2/27 | T3/27 | Lũy kế |
 |---|---:|---:|---:|---:|---:|---:|
-| BU1 – Affiliate & Social Growth | 150 | 300 | 500 | 450 | 500 | 1.900 |
-| BU2 – Beauty Entry | 40 | 80 | 120 | 100 | 120 | 460 |
+| BU1 – Social & Partner Sales | 150 | 300 | 500 | 450 | 500 | 1.900 |
+| BU2 – Hook Products | 40 | 80 | 120 | 100 | 120 | 460 |
 | BU3 – Medical Tourism | — | 100 | 300 | 200 | 100 | 700 |
 | BU4 – B2B | — | — | — | 150 | 300 | 450 |
 | **Tổng** | **190** | **480** | **920** | **900** | **1.020** | **3.510** |
@@ -50,7 +50,7 @@
 
 | | Nguồn lực | Cách sử dụng / đầu tư |
 |---|---|---|
-| **Sẵn có** | Chính sách hoa hồng đối tác / Agent | Kênh Affiliate (BU1); ban hành thêm phụ lục cho đối tác BU3, BU4 |
+| **Sẵn có** | Chính sách hoa hồng đối tác / Agent | Kênh Partner (BU1); ban hành thêm phụ lục cho đối tác BU3, BU4 |
 | | Quy trình vận hành dịch vụ | Bổ sung quy trình online: SLA phản hồi 5 phút, kịch bản tư vấn, đặt & nhắc lịch |
 | | Tài liệu đào tạo | Bổ sung học phần tư vấn từ xa và tuân thủ quảng cáo y tế |
 | | Đội ngũ nội bộ | 2 bác sĩ làm gương mặt kênh (2–4 giờ/tuần); tư vấn viên tiếp nhận khách tại viện |
@@ -61,29 +61,55 @@
 
 ---
 
-## 4. Kế hoạch theo BU
+## 4. Danh mục sản phẩm & chiến lược bậc giá
 
-### BU1 — Affiliate & Social Growth
+Bảng giá niêm yết PTTM được tổ chức thành **ba bậc**, mỗi bậc giữ một vai trò trong hành trình khách hàng. BU2 đứng trước bậc 1 với vai trò sản phẩm mồi.
+
+| Bậc | Vai trò | Dịch vụ tiêu biểu (giá niêm yết) | Kênh chủ lực |
+|---|---|---|---|
+| **Mồi** (< 5 tr) | Kéo khách mới, tạo dữ liệu | Phun xăm mày, môi (BU2) | TikTok organic, giới thiệu bạn bè |
+| **1 – Entry** (5–20 tr) | Lần phẫu thuật đầu tiên, quyết định nhanh | Lấy mỡ mí 8 tr · Mở góc mắt 8 tr · Thu gọn cánh mũi 7,6 tr · Thu nhỏ nền mũi 9,6 tr · Sụp mí 4,8–11,2 tr · Tiêu mỡ má / nọng cằm 14 tr · Xóa rãnh lệ 15 tr · Thẩm mỹ vùng kín 12 tr | TikTok, Threads |
+| **2 – Core** (20–60 tr) | Doanh thu chính của BU1 | Cắt mí Eyelift 20,5–22,5 tr · Nâng cung mày Golden Brow 25,8–30,2 tr · Nâng mũi Softxil 43 tr / Surgiform 58 tr · Hút mỡ 1 vùng 20–31 tr | Threads, TikTok, Instagram |
+| **3 – Premium** (≥ 60 tr) | Giá trị đơn hàng cao, tư vấn chuyên sâu | Nâng ngực 70–140 tr · Thu gọn / treo ngực 45,5–150 tr · Mũi cấu trúc 120–150 tr · Đùi thon 52–80 tr · Thành bụng CurveUp 99–139 tr · Căng da Ultra Lift 30–203,5 tr | Instagram, Partner, Medical Tourism |
+
+**Lộ trình nâng bậc (upsell):**
+- Phun mày → **Nâng cung mày Golden Brow** / **Cắt mí Eyelift**.
+- Dịch vụ mắt, mũi bán lẻ → gói **Eyelift** / **Nâng mũi cấu trúc** (kèm bọc sụn 3–5 tr).
+- Hút mỡ 1 vùng → nhiều vùng → **CurveUp**.
+
+**Ba gói chủ lực cho truyền thông:**
+
+| Gói | Thành phần | Tệp khách | BU ưu tiên |
+|---|---|---|---|
+| **Mommy Makeover** | Nâng / treo ngực + Thành bụng CurveUp + Thẩm mỹ tầng sinh môn sau sinh | Phụ nữ sau sinh 28–45 tuổi | BU1, BU3 |
+| **Sửa lại cho đúng** | Chỉnh sửa mí / mũi đã phẫu thuật, Rút chất liệu, Mũi Perfect Reframe | Khách từng phẫu thuật chưa hài lòng | BU1 |
+| **Ultra Lift trẻ hóa** | Căng da Ultra Lift Signature / Elite / Prestige | Khách 40+, Việt kiều | BU3, Partner |
+
+---
+
+## 5. Kế hoạch theo BU
+
+### BU1 — Social & Partner Sales
 
 **Mục tiêu: 500 triệu/tháng từ T1/2027** — 25 khách, giá trị bình quân ~20 triệu.
 
 **Cơ cấu doanh thu**
 
-| Dịch vụ | Khách | Giá TB | Doanh thu | Lượt đến viện |
-|---|---:|---:|---:|---:|
-| Nâng ngực | 2 | 64 tr | 128 tr | 4 |
-| Nâng mũi | 5 | 35 tr | 175 tr | 8 |
-| Cắt mí | 10 | 10 tr | 100 tr | 14 |
-| Hút mỡ | 1 | 45 tr | 45 tr | 2 |
-| Thẩm mỹ nội khoa | 5 | 6 tr | 30 tr | 6 |
-| PTTM khác | 2 | 10 tr | 20 tr | 4 |
-| **Tổng** | **25** | | **~500 tr** | **~40** |
+| Dịch vụ | Khách | Giá thực thu TB | Giá niêm yết tham chiếu | Doanh thu | Lượt đến viện |
+|---|---:|---:|---|---:|---:|
+| Nâng ngực | 2 | 64 tr | 70–140 tr | 128 tr | 4 |
+| Nâng mũi | 5 | 35 tr | 43–58 tr (Signature) | 175 tr | 8 |
+| Mắt (cắt mí & bán lẻ) | 10 | 10 tr | 8–22,5 tr | 100 tr | 14 |
+| Hút mỡ | 1 | 45 tr | 20–31 tr/vùng | 45 tr | 2 |
+| Thẩm mỹ nội khoa | 5 | 6 tr | Bảng giá riêng | 30 tr | 6 |
+| PTTM khác | 2 | 10 tr | 12–50 tr | 20 tr | 4 |
+| **Tổng** | **25** | | | **~500 tr** | **~40** |
 
 **Phễu & kênh**
 
 ```
 380 lead  →  ~68 lịch hẹn (18%)  →  35 đến viện (52%)  ┐
-                                       5 đến viện từ Affiliate ┴→ 40 đến viện → 25 khách (~63%)
+                                     5 đến viện từ Partner ┴→ 40 đến viện → 25 khách (~63%)
 ```
 
 | Kênh | Lead | Đến viện | Trọng tâm |
@@ -91,23 +117,25 @@
 | Threads | 200 | ~19 | Bác sĩ hỏi đáp, cộng đồng + quảng cáo Meta |
 | TikTok | 100 | ~10 | Video bác sĩ, hành trình khách hàng, livestream, lead ads |
 | Instagram | 80 | ~8 | Reels kết quả, câu chuyện khách hàng, tư vấn inbox |
-| Affiliate (Agent) | — | 5 | Khách giới thiệu theo chính sách hoa hồng hiện hành |
+| Partner (Agent) | — | 5 | Khách giới thiệu theo chính sách hoa hồng hiện hành |
 
 **Ngân sách 150 triệu/tháng (30%)** — CAC ≤ 6 triệu/khách:
-Media 85 tr · Nội dung & KOC 20 tr · Thưởng Sale online 18 tr · Hoa hồng Affiliate 10 tr · Công cụ 5 tr · Dự phòng 12 tr.
+Media 85 tr · Nội dung & KOC 20 tr · Thưởng Sale online 18 tr · Hoa hồng Partner 10 tr · Công cụ 5 tr · Dự phòng 12 tr.
 Tăng theo doanh thu: T11 ~70 tr → T12 ~110 tr → T1 ~150 tr.
 
 **Quy tắc vận hành**
 - 4 tuần đầu chia đều ngân sách để đo; từ tuần 5 dồn **70% ngân sách vào kênh có chi phí/lượt đến viện thấp nhất**.
 - Threads thiên về organic: giai đoạn thử nghiệm đặt 80–100 lead/tháng, phần chênh lệch bù bằng Meta và TikTok.
 
-**KPI tuần:** ≥ 95 lead · CPL ≤ 250.000đ · Phản hồi ≤ 5 phút · Lead → Lịch hẹn ≥ 20% · Lịch hẹn → Đến viện ≥ 50% · Đến viện → Doanh thu ≥ 60%.
+**KPI tuần:** ≥ 95 lead · CPL ≤ 250.000đ · Phản hồi ≤ 5 phút · Lead → Lịch hẹn ≥ 18% · Lịch hẹn → Đến viện ≥ 50% · Đến viện → Doanh thu ≥ 60%.
 
 ---
 
-### BU2 — Beauty Entry: Phun xăm Mày & Môi
+### BU2 — Hook Products: Sản phẩm mồi Phun xăm Mày & Môi
 
 **Mục tiêu: 120 triệu/tháng từ T1/2027** — 40 khách × 3 triệu; ngân sách ≤ 18 triệu/tháng (CAC ≤ 450.000đ).
+
+**Vai trò sản phẩm mồi:** Giá thấp, quyết định nhanh, ít rủi ro — dùng để có khách mới với chi phí thấp nhất, sau đó dẫn dắt sang bậc Entry và Core (phun mày → nâng cung mày, cắt mí).
 
 **Cách làm**
 - Phễu: ~270 lead → ~55 đến viện → 40 khách; CPL mục tiêu ≤ 60.000đ.
@@ -145,7 +173,7 @@ Tăng theo doanh thu: T11 ~70 tr → T12 ~110 tr → T1 ~150 tr.
 
 ---
 
-## 5. Kế hoạch hành động 90 ngày
+## 6. Kế hoạch hành động 90 ngày
 
 | Tuần | Thời gian | Hành động | Phụ trách |
 |---|---|---|---|
@@ -160,7 +188,7 @@ Tăng theo doanh thu: T11 ~70 tr → T12 ~110 tr → T1 ~150 tr.
 
 ---
 
-## 6. Quản trị & rủi ro
+## 7. Quản trị & rủi ro
 
 **Nhịp quản trị**
 - **Hằng ngày:** dashboard CRM — lead mới, thời gian phản hồi, lịch hẹn.
@@ -175,7 +203,7 @@ Tăng theo doanh thu: T11 ~70 tr → T12 ~110 tr → T1 ~150 tr.
 | Quảng cáo dịch vụ y tế bị từ chối / vi phạm | Xác nhận nội dung trước khi chạy; ưu tiên nội dung giáo dục; pháp chế duyệt kịch bản |
 | Threads chưa đạt quy mô lead | Mục tiêu theo giai đoạn; bù bằng Meta & TikTok |
 | Lead xử lý chậm | SLA 5 phút; chatbot & tổng đài ngoài giờ; thưởng theo tỷ lệ đến viện |
-| Trùng nguồn Affiliate / kênh mới / hệ thống hiện hữu | CRM chung; quy tắc "nguồn ghi nhận trước được tính" |
+| Trùng nguồn Partner / kênh mới / hệ thống hiện hữu | CRM chung; quy tắc "nguồn ghi nhận trước được tính" |
 | Khủng hoảng truyền thông từ sự cố y khoa | Quy trình xử lý khủng hoảng; phản hồi trong 2 giờ |
 | Dữ liệu cá nhân & sức khỏe | Chỉ dùng dữ liệu first-party có đồng ý, theo Luật Bảo vệ dữ liệu cá nhân (hiệu lực 01/01/2026) |
 
@@ -191,4 +219,5 @@ Tăng theo doanh thu: T11 ~70 tr → T12 ~110 tr → T1 ~150 tr.
 | Tốc độ đạt mục tiêu BU1 | T11 30% · T12 60% · T1/2027 100% |
 | Năng suất Sale online | 120–130 lead mới/người/tháng |
 | Giá trị bình quân: Phun xăm / Medical Tourism / Lượt khám B2B | 3 tr / ~50 tr / 1,2 tr |
+| Giá thực thu BU1 so với giá niêm yết | Theo chính sách ưu đãi hiện hành; hiệu chỉnh theo doanh thu thực tế |
 | Chi phí cố định đội Digital Growth | 130–150 triệu/tháng |
